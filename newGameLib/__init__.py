@@ -1,6 +1,7 @@
-from . import myLibraries
 from importlib import reload
 
-reload(myLibraries)
+from . import myLibraries
 
 from .myLibraries import *
+
+reload(myLibraries)

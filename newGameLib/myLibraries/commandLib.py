@@ -1,103 +1,130 @@
-import os
 import bpy
-	
+import os
+
+import zipfile
+
+"""
+
+def bf_parser(filename,g):
+	cmd=Cmd()
+	cmd.inputFile=filename
+	cmd.outputFolder='x:\\tintin'
+	quickbms.bms='D:\\all\\T\\Tintin\\tintin.bms.txt'
+	cmd.command=quickbms
+	cmd.run()
+"""
+
 blendDir=os.path.dirname(bpy.context.blend_data.filepath)
-toolsDir=blendDir+os.sep+"newGameLib"+os.sep+"tools"
+toolsDir=blendDir+os.sep+"tools"
+bmsDir=toolsDir+os.sep+'quickbms'+os.sep+'scripts'
 
-
-									
-class Cmd:
+class Command():
 	def __init__(self):
-		self.type=None
 		self.input=None
 		self.output=None
 		self.option=None
 		self.exe=None
-		self.line=None
-		self.script=None
-		
-	def OFFZIP(self):	
-		self.option='-a -1'
-		self.start='0'
-		self.exe=toolsDir+os.sep+"Offzip"+os.sep+"offzip.exe"
-		self.line=self.exe+' '+self.option+'  "'+self.input+'" "'+self.output+'" "'+self.start+'"'
-		os.system(self.line)
-		
-	def PNG(self):	
-		self.option=' -out png '
-		self.exe=toolsDir+os.sep+"Nconvert/nconvert.exe"	
-		self.line=self.exe+self.option+' "'+ self.input+'"'	
-		os.system(self.line)
-		
-	def JPG(self):	
-		self.option=' -out jpeg '
-		self.exe=toolsDir+os.sep+"Nconvert/nconvert.exe"	
-		self.line=self.exe+self.option+' "'+ self.input+'"'	
-		os.system(self.line)
-		
-	def GR2(self):	
-		self.option='-a'
-		self.exe=toolsDir+os.sep+"Gr2/grnreader98.exe"
-		self.line=self.exe+' "'+ self.input +'" '+ self.option
-		os.system(self.line)
-	
-		
-	def NOESIS(self):	
-		self.option="?cmode"
-		self.exe=toolsDir+os.sep+"noesis"+os.sep+"noesis.exe"
-		self.line=self.exe+' "'+ self.input +'" '+ self.option
-		os.system(self.line)
-		
-	def ZIP(self):	
-		self.option='x'
-		self.exe=toolsDir+os.sep+"7z"+os.sep+"7z.exe"
-		self.line=self.exe+' '+self.option+' "'+self.input+'" -y -o"'+os.path.dirname(self.input)+'"'
-		os.system(self.line)
-		
-	def CD(self):	
-		self.exe=blendDir+os.sep+'"tools/CDisplay/CDisplay.exe"'
-		self.line=self.exe+' "'+ self.input +'" '
-		os.system(self.line)	
-		
-	def PDF(self):	
-		self.exe=blendDir+os.sep+'"tools/PdfReader/reader.exe"'
-		self.line=self.exe+' "'+ self.input +'" '
-		os.system(self.line)
-		
-	def QUICKBMS(self):	
-		self.option='"-export" "-meshes" "-nostat"'
-		self.exe=toolsDir+os.sep+"quickbms"+os.sep+"quickbms.exe"
-		self.script=toolsDir+os.sep+"quickbms"+os.sep+"bms"+os.sep+bms
-		self.line=self.exe+self.script+self.input+self.output
-		os.system(self.line)
-		
-	def UMODEL(self):	
-		self.option='"-export" "-meshes" "-nostat"'
-		self.exe=toolsDir+os.sep+'Umodel'+os.sep+'umodel.exe'
-		self.line=self.exe+self.option
-		os.system(self.line)
-		
-	def PVR(self):	
-		self.option=' -i "'+self.input+'" -d -f r8g8b8a8'
-		self.exe=toolsDir+os.sep+"Pvr"+os.sep+"PVRTexToolCLI.exe"
-		self.line=self.exe+self.option
-		os.system(self.line)
-	
-def do(filename):	
-	cmd=Cmd()
-	cmd.input=filename
-	cmd.PVR()	
+		self.start=str(0)
+		self.bms=None
+		self.bmsDir=toolsDir+os.sep+"quickbms"+os.sep+"bms"
 
-#Blender.Window.FileSelector(do)
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-			
+offzip=Command()
+offzip.option=' -a -z -15'#-1
+offzip.exe=toolsDir+os.sep+"Offzip"+os.sep+"offzip.exe"
+offzip.start='0'
+
+PNG=Command()
+PNG.option=' -out png '
+PNG.exe=toolsDir+os.sep+"Nconvert/nconvert.exe"
+
+JPG=Command()
+JPG.option=' -out jpeg '
+JPG.exe=toolsDir+os.sep+"Nconvert/nconvert.exe"
+
+DDS=Command()
+DDS.option=' -out dds '
+DDS.exe=toolsDir+os.sep+"Nconvert/nconvert.exe"
+
+zip=Command()
+zip.option='x'
+zip.exe=toolsDir+os.sep+"7z"+os.sep+"7z.exe"
+
+quickbms=Command()
+quickbms.exe=toolsDir+os.sep+"quickbms"+os.sep+"quickbms.exe"
+
+gr2=Command()
+gr2.option='-a'
+gr2.exe=toolsDir+os.sep+'"Gr2/grnreader98.exe"'
+
+noesis=Command()
+noesis.option="?cmode"
+noesis.exe=toolsDir+os.sep+"noesis"+os.sep+"noesis.exe"
+
+cd=Command()
+cd.exe=blendDir+os.sep+'"tools/CDisplay/CDisplay.exe"'
+
+pdf=Command()
+pdf.exe=blendDir+os.sep+'"tools/PdfReader/reader.exe"'
+
+UMODEL=Command()
+UMODEL.exe=toolsDir+os.sep+'umodel'+os.sep+'umodel.exe'
+UMODEL.option='"-export" "-meshes" "-nostat"'
+
+
+
+class Cmd():
+	def __init__(self):
+		self.input=None
+		self.output=None
+		self.option=''
+		self.exe=''
+		self.gr2=False
+		self.cd=False
+		self.pdf=False
+		self.PNG=False
+		self.DDS=False
+		self.JPG=False
+		self.UMODEL=False
+		self.QUICKBMS=False
+		self.OFFZIP=False
+		self.ZIP=False
+
+	def run(self):
+		#print('offzip')
+		#if self.output is not None:
+		#	try:os.mkdir(self.output)
+		#	except:pass
+
+		commandline=None
+		if self.gr2==True:commandline = gr2.exe+' "'+ self.input +'" '+ gr2.option
+		if self.cd==True:commandline = cd.exe+' "'+ self.input+'"'
+		if self.pdf==True:commandline = pdf.exe+' "'+ self.input+'"'
+		if self.PNG==True:commandline = PNG.exe+PNG.option+' "'+ self.input+'"'
+		if self.JPG==True:commandline = JPG.exe+JPG.option+' "'+ self.input+'"'
+		if self.DDS==True:commandline = DDS.exe+DDS.option+' "'+ self.input+'"'
+		if self.QUICKBMS==True:
+			if len(self.bms.split(os.sep))>1:
+				commandline = quickbms.exe+' "'+self.bms+'"  "'+self.input+'" "'+self.output+'"'
+			else:
+				commandline = quickbms.exe+' "'+bmsDir+os.sep+self.bms+'"  "'+self.input+'" "'+self.output+'"'
+			print(commandline)
+
+		if self.OFFZIP==True:commandline = offzip.exe+' '+offzip.option+'  "'+self.input+'" "'+self.output+'" "'+offzip.start+'"'
+		if self.UMODEL==True:commandline = UMODEL.exe+' '+UMODEL.option+' '+ '-out="'+os.path.dirname(self.input)+'" "'+self.input+'"'
+		#if self.ZIP==True:commandline = zip.exe+' '+zip.option+' "'+ self.input+'" -o"'+self.output+'"'
+		#if self.ZIP==True:commandline=zip.exe+' '+zip.option+' "'+self.input+'" -o"'+os.path.dirname(self.input)+'"'
+		if self.ZIP==True:commandline=zip.exe+' '+zip.option+' "'+self.input+'" -y -o"'+os.path.dirname(self.input)+'"'
+		if commandline is not None:os.system(commandline)
+
+
+
+
+
+
+
+
+
+
+
+
+

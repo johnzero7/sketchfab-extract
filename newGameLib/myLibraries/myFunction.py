@@ -1,26 +1,56 @@
 import bpy
-import os	
+import os
 from mathutils import *
 import types
-#from Draw import *
 import math
 from math import *
+import subprocess
 
+def Noesis(input,output):
+	noesisPath="D:\\game3DmodelImporter\\tools\\Noesis\\noesisv412\\Noesis.exe"
+	if os.path.exists(noesisPath)==False:
+		noesisPath=os.path.dirname(bpy.context.blend_data.filepath)
+		noesisPath=blendDir+os.sep+"tools"
+		noesisPath=noesisPath+os.sep+"Noesis"+os.sep+"noesisv412"+os.sep+"Noesis.exe"
+	if os.path.exists(input)==True and os.path.exists(output)==False and os.path.exists(noesisPath)==True:
+		command = noesisPath+' '+ "?cmode"+' "'+ input +'" "'+ output + '"'
+		#Noesis(input,output)
+		os.system(command)
+
+
+def quickbms(bms,input):
+	txt = open("bms.txt","w")
+	txt.write(bms)
+	txt.close()
+	blendDir=os.path.dirname(bpy.context.blend_data.filepath)
+	toolsDir=blendDir+os.sep+"tools"
+	quickbms=toolsDir+os.sep+"quickbms"+os.sep+"quickbms.exe"
+	output=os.path.dirname(input)+os.sep+os.path.basename(input)+"_files"
+	if os.path.exists(output)==False:os.makedirs(output)
+	commandline = quickbms+' -k "'+blendDir+os.sep+"bms.txt"+'" "'+input+'" "'+output+'"'
+	os.system(commandline)
+
+
+def bintostr(binname):
+	name=''
+	for	a in binname:
+		name+=str(hex(ord(a))).split('0x')[1]
+	return name
 
 def setBoneMatrix(object,skeletonObject,boneName):
 	bones=skeletonObject.getData().bones
 	if boneName in bones.keys():
 		matrix=bones[boneName].matrix['ARMATURESPACE']
-		object.setMatrix(matrix)
+		object.setMatrix(object.matrixWorld*matrix)
 
 def removeMaterials():
 		scn = data.scenes.active
 		for ob in scn.objects.context:
 				if not ob.lib and ob.type == 'Mesh':    # object isn't from a library and is a mesh
- 
-						me = ob.getData(mesh=1)	
+
+						me = ob.getData(mesh=1)
 						nme=NMesh.GetRaw(me.name)
-						mats = nme.materials 
+						mats = nme.materials
 						i=0
 						for m in mats:
 								del nme.materials[i]
@@ -35,7 +65,7 @@ def XOR(inData,key):
 	outData=''
 	for val in inData:
 		outData+=chr(ord(val)^0x96)
-	return outData	
+	return outData
 
 
 byte=0x2
@@ -48,10 +78,10 @@ print(byte)
 				for fc in msh.faces:
 					fc.mode |= Blender.NMesh.FaceModes['TEX']
 					fc.mode |= Blender.NMesh.FaceModes['LIGHT']
-					
+
 				if len(newdoubles) > 0:
-					f.mode |= Blender.NMesh.FaceModes['TWOSIDE']  
-					
+					f.mode |= Blender.NMesh.FaceModes['TWOSIDE']
+
             nrot = doc.createElement("rotate")
             nrot.setAttribute("x", "1")
             nrot.setAttribute("angle", str(180/3.1416*obj.rotation_euler[0]))
@@ -68,10 +98,10 @@ print(byte)
             nmove.setAttribute("x", '%3.3f' % obj.location.x)
             nmove.setAttribute("y", '%3.3f' % obj.location.y)
             nmove.setAttribute("z", '%3.3f' % obj.location.z)
-			
-			
-			
-			
+
+
+
+
 			euler = mathutils.Euler()
 			RotateEuler(euler,z,'z')
 			RotateEuler(euler,x,'x')
@@ -82,7 +112,7 @@ print(byte)
 
 
 #	t = Blender.sys.time()
-#	print('%.2f seconds' % (Blender.sys.time()-t) )
+#	print('%.2f seconds' % (Blender.sys.time()-t))
 
 
 
@@ -106,15 +136,15 @@ print(byte)
     finally:
         if file_object is not None:
             file_object.close()
-			
-			
+
+
 def main():
     def pw_file_selector(file_path):
         if file_path and not Blender.sys.exists(file_path):
             Blender.Draw.PupMenu("Error%%t|The file %s does not exist." % file_path)
         else:
             pw_ski_read(file_path)
-    
+
     Blender.Window.FileSelector(pw_file_selector, 'Ok', Blender.sys.makename(ext='.ski'))
 
 
@@ -125,9 +155,9 @@ if __name__ == "__main__":
 
 def EncString(string):
 	enc = sys.getfilesystemencoding()
-	
-	return unicode(string,"shift-jis").encode(enc,"replace")			
-	
+
+	return unicode(string,"shift-jis").encode(enc,"replace")
+
 def read_int(self, size):
         if size==1:
             return self.unpack("b", size)
@@ -136,7 +166,7 @@ def read_int(self, size):
         if size==4:
             return self.unpack("i", size)
         print("not reach here")
-        raise ParseException("invalid int size: "+size)		
+        raise ParseException("invalid int size: "+size)
 """
 
 
@@ -162,7 +192,7 @@ class switch(object):
 		"""Return the match method once, then stop"""
 		yield self.match
 		raise StopIteration
-    
+
 	def match(self, *args):
 		"""Indicate whether or not to enter a case suite"""
 		if self.fall or not args:
@@ -173,11 +203,11 @@ class switch(object):
 		else:
 			return False
 
-	
+
 #a=range(5)
 #a=[0,1,2,3,4]
 #print(a[::-1])
-#a=[5,4,3,2,1]	
+#a=[5,4,3,2,1]
 
 
 
@@ -199,12 +229,12 @@ def read(filename):
             filename = zf.open(member)
             #print("Unzipping", member)
             try:load_meshes(filename)
-            except:pass 
+            except:pass
             Blender.Window.Redraw()
     time2 = time.time()
     print("Total import time is: %.2f seconds." % (time2 - time1))
-"""	
-	
+"""
+
 """
 
 			euler = mathutils.Euler()
@@ -215,25 +245,28 @@ def read(filename):
 			bone.rotKeyList.append(matrix)
 """
 
-	
-	
+
+
 def write(input,list,pad):
 	string=' '*pad
 	for item in list:
-		string+=str(item)+' '
+		if type(item)==unicode:
+			string+=item.encode('utf-8')+' '
+		else:
+			string+=str(item)+" "
 	string+='\n'
-	input.write(string)	
-	
-	
+	input.write(string)
+
+
 def safe(count):
-	if count<1000000:
+	if count<10000000:
 		return range(count)
 	else:
 		print('WARNING:too long:',count)
 		return [0]
-	
-	
-"""	
+
+
+"""
 def write(input,list,pad):
 	if log==True:
 		string=' '*pad
@@ -241,42 +274,42 @@ def write(input,list,pad):
 			itemName=getNameVariable(item)
 			if itemName is not None:
 				string+=itemName+':'+str(item)+' '
-			else:	
+			else:
 				string+=str(item)+' '
 		string+='\n'
-		input.write(string)	
-	
+		input.write(string)
+
 def getNameVariable(variable):
 	ID=eval("'" + str(id(variable)) + "'")
 	output=None
 	for name in dir():
 		if id(eval(name))==ID:
 			output=name
-	return output		
-"""	
-"""	
+	return output
+"""
+"""
 	jj = 123
 ID=eval("'" + str(id(jj)) + "'")
 d=10
 for x in dir():
-	#print(x	)
+	#print(x)
 	if id(eval(x)) ==ID:
-		print(x  )
-		
+		print(x)
+
 """
 """
 string.zfill()
-"""		
+"""
 
 
 """
 		byteAsInt=g.B(1)[0]
 		ctrlBits.extend(map(int,list(bin(byteAsInt)[2:].rjust(8, '0'))))
-"""		
-	
+"""
 
-	
-	
+
+
+
 class Input(object):
 	def __init__(self,flagList):
 		self.flagList=flagList
@@ -292,47 +325,47 @@ class Input(object):
 		if type(flagList)==types.StringType:
 			self.type='string'
 			self.filename=flagList
-			
+
 def Input1(object):
-	return object	
-			
-def Output(object):	
 	return object
-			
-		
+
+def Output(object):
+	return object
+
+
 
 def Float255(data):
 	list=[]
 	for get in data:
 		list.append(get/255.0)
-	return list	
+	return list
 
 
 def pm(message,n):
 	print(' '*4*n,message)
 
-	
-	
-if toolDir is not None:	
+
+
+if toolDir is not None:
 	bmsDir=toolDir+os.sep+'quickbms'
 	bmsExe=bmsDir+os.sep+'quickbms.exe'
 	bmsScriptDir=bmsDir+os.sep+'scripts'
-	
+
 class Bms(object):
 	def __init__(self):
 		self.input=input
 		self.output=''
 		self.bms=None
 		self.command=' '#' -d -o '
-		
+
 	def run(self):
 		if self.bms is not None:
 			self.bms=bmsScriptDir+os.sep+self.bms
-			commandline = bmsExe +self.command+self.bms+ ' ' + self.input + ' '+self.output
+			commandline = bmsExe +self.command+self.bms+ ' "' + self.input + '" "'+self.output+'"'
 			print(commandline)
 			os.system(commandline)
-			
-		
+
+
 class Searcher():
 	def __init__(self):
 		self.dir=None
@@ -340,66 +373,38 @@ class Searcher():
 		self.part=None#ext,dir,base
 		self.what=None
 	def run(self):
-		dir=self.dir	
+		dir=self.dir
 		def tree(dir):
 			listDir = os.listdir(dir)
 			olddir = dir
 			for file in listDir:
 				if self.part=='ext':
-					if self.what.lower() in file.lower().split('.')[-1]:				
+					if self.what.lower() in file.lower().split('.')[-1]:
 						if os.path.isfile(olddir+os.sep+file)==True:
 							self.list.append(olddir+os.sep+file)
-							
-				else:			
-					if self.what.lower() in file.lower():				
+
+				else:
+					if self.what.lower() in file.lower():
 						if os.path.isfile(olddir+os.sep+file)==True:
 							self.list.append(olddir+os.sep+file)
-						
+
 				if os.path.isdir(olddir+os.sep+file)==True:
 					dir = olddir+os.sep+file
 					tree(dir)
-		tree(dir)	
-		
+		tree(dir)
 
-		
-	
-	
+
+
+
+
 def isQuat(quat):
 	sum=quat[0]**2+quat[1]**2+quat[2]**2+quat[3]**2
-	return sum	
-	
-	
-	
-def quatDecompress3(s0,s1,s2):  
-	tmp0= s0>>15 
-	tmp1= (s1*2+tmp0) & 0x7FFF
-	s0= s0 & 0x7FFF ;
-	tmp2= s2*4 ;
-	tmp2= (s2*4+ (s1>>14)) & 0x7FFF ;
-	s1= tmp1 ;
-	AxisFlag= s2>>13 ;
-	#AxisFlag = ((s1 & 1) << 1) | (s2 & 1)
-	s2= tmp2 ;
-	f0 = 1.41421*(s0-0x3FFF)/0x7FFF ;
-	f1 = 1.41421*(s1-0x3FFF)/0x7FFF ;
-	f2 = 1.41421*(s2-0x3FFF)/0x7FFF ;  
-	f3 = sqrt(1.0-(f0*f0+f1*f1+f2*f2)) 
-	#print(AxisFlag)
-	if AxisFlag==3:
-		x= f2
-		y= f1
-		z= f0
-		w= f3
-	if AxisFlag==2:x= f2;y= f1;z= f3;w= f0
-	if AxisFlag==1:x= f2;y= f3;z= f1;w= f0
-	if AxisFlag==0:x= f3;y= f2;z= f1;w= f0
-	#print(x,y,z,w  )
-	return x,y,z,w  
+	return sum
 
-	
-	
-def quatDecompress(s0,s1,s2):  
-	tmp0= s0>>15 
+
+
+def quatDecompress3(s0,s1,s2):
+	tmp0= s0>>15
 	tmp1= (s1*2+tmp0) & 0x7FFF
 	s0= s0 & 0x7FFF ;
 	tmp2= s2*4 ;
@@ -410,8 +415,8 @@ def quatDecompress(s0,s1,s2):
 	s2= tmp2 ;
 	f0 = 1.41421*(s0-0x3FFF)/0x7FFF ;
 	f1 = 1.41421*(s1-0x3FFF)/0x7FFF ;
-	f2 = 1.41421*(s2-0x3FFF)/0x7FFF ;  
-	f3 = sqrt(1.0-(f0*f0+f1*f1+f2*f2)) 
+	f2 = 1.41421*(s2-0x3FFF)/0x7FFF ;
+	f3 = sqrt(1.0-(f0*f0+f1*f1+f2*f2))
 	#print(AxisFlag)
 	if AxisFlag==3:
 		x= f2
@@ -421,24 +426,52 @@ def quatDecompress(s0,s1,s2):
 	if AxisFlag==2:x= f2;y= f1;z= f3;w= f0
 	if AxisFlag==1:x= f2;y= f3;z= f1;w= f0
 	if AxisFlag==0:x= f3;y= f2;z= f1;w= f0
-	#print(x,y,z,w  )
-	return x,y,z,w  
-	
+	#print(x,y,z,w)
+	return x,y,z,w
+
+
+
+def quatDecompress(s0,s1,s2):
+	tmp0= s0>>15
+	tmp1= (s1*2+tmp0) & 0x7FFF
+	s0= s0 & 0x7FFF ;
+	tmp2= s2*4 ;
+	tmp2= (s2*4+ (s1>>14)) & 0x7FFF ;
+	s1= tmp1 ;
+	AxisFlag= s2>>13 ;
+	#AxisFlag = ((s1 & 1) << 1) | (s2 & 1)
+	s2= tmp2 ;
+	f0 = 1.41421*(s0-0x3FFF)/0x7FFF ;
+	f1 = 1.41421*(s1-0x3FFF)/0x7FFF ;
+	f2 = 1.41421*(s2-0x3FFF)/0x7FFF ;
+	f3 = sqrt(1.0-(f0*f0+f1*f1+f2*f2))
+	#print(AxisFlag)
+	if AxisFlag==3:
+		x= f2
+		y= f1
+		z= f0
+		w= f3
+	if AxisFlag==2:x= f2;y= f1;z= f3;w= f0
+	if AxisFlag==1:x= f2;y= f3;z= f1;w= f0
+	if AxisFlag==0:x= f3;y= f2;z= f1;w= f0
+	#print(x,y,z,w)
+	return x,y,z,w
+
 def QuatMatrix(quat):
-	return Quaternion(quat[3],quat[0],quat[1],quat[2]).toMatrix()	
-	
-	
+	return Quaternion(quat[3],quat[0],quat[1],quat[2]).toMatrix()
+
+
 def VectorMatrix(vector):
-	return TranslationMatrix(Vector(vector))		
-	
-	
+	return TranslationMatrix(Vector(vector))
+
+
 def roundVector(vec,dec=17):
 	fvec=[]
 	for v in vec:
 		fvec.append(round(v,dec))
 	return Vector(fvec)
-	
-	
+
+
 def roundMatrix(mat,dec=17):
 	fmat = []
 	for row in mat:
@@ -449,14 +482,14 @@ def Matrix4x4(data):
 	return Matrix(  data[:4],\
 					data[4:8],\
 					data[8:12],\
-					data[12:16])	
+					data[12:16])
 
 def Matrix3x3(data):
 	return Matrix(  data[:3],\
 					data[3:6],\
 					data[6:9])
-	
-	
+
+
 def Matrix4x3(data):
 	#print(data)
 	data=list(data)
@@ -464,7 +497,7 @@ def Matrix4x3(data):
 					data[3:6]+[0.0],\
 					data[6:9]+[0.0],\
 					data[9:12]+[1.0])
-		
+
 
 def VectorScaleMatrix(scale):
 	mat = mathutils.Matrix(
@@ -475,10 +508,10 @@ def VectorScaleMatrix(scale):
 			)
 	mat *= mathutils.ScaleMatrix(scale[0], 4, mathutils.Vector([1, 0, 0]))
 	mat *= mathutils.ScaleMatrix(scale[1], 4, mathutils.Vector([0, 1, 0]))
-	mat *= mathutils.ScaleMatrix(scale[2], 4, mathutils.Vector([0, 0, 1]))	
+	mat *= mathutils.ScaleMatrix(scale[2], 4, mathutils.Vector([0, 0, 1]))
 	return mat
-	
-	
+
+
 def decrypt_string(string):
 	'''Return the decrypted string. XOR each character in the string by
 	FF to get the actual character. Strings are null-terminated.'''
@@ -491,7 +524,7 @@ def decrypt_string(string):
 		#inverted += chr(string[i] ^ 0xFF)
 		inverted += chr(m ^ 0x55)
 	return inverted
-	
+
 class Script:
 	"""
 	init
@@ -515,27 +548,27 @@ class Script:
 			txt=Blender.sys.basename(self.input)
 			if txt not in textList:
 				text=Blender.Text.Load(self.input)
-			scn.addScriptLink(txt,'Redraw')			
-				
+			scn.addScriptLink(txt,'Redraw')
 
-	
-		
-		
+
+
+
+
 def ParseID():
 		#0-0-0 - oznacza kolejno meshID - matID - objectID
 		ids = []
 		objectID=0
 		modelID=0
 		matID=0
-		scene = bpy.data.scenes.active
-		
+		scene = bpy.context.scene
+
 		#for meshID
 		for object in scene.objects:
-			if object.getType()=='Mesh':
+			if object.type=='Mesh':
 				try:
 					meshID = int(object.getData(mesh=1).name.split('-')[0])
 					ids.append(meshID)
-				except:pass 
+				except:pass
 		try:
 			meshID = max(ids)+1
 		except:
@@ -548,27 +581,27 @@ class SceneIDList:
 		meshIDList=[]
 		objectIDList=[]
 		szkieletIDList=[]
-		scene = bpy.data.scenes.active
+		scene = bpy.context.scene
 		for object in scene.objects:
-			if object.getType()=='Mesh':
+			if object.type=='Mesh':
 				try:
 					meshID = int(object.getData(mesh=1).name.split('-')[0])
 					meshIDList.append(meshID)
-				except:pass 
+				except:pass
 				try:
 					objectID = int(object.getData(mesh=1).name.split('-')[2])
 					objectIDList.append(objectID)
-				except:pass 
+				except:pass
 		for mesh in bpy.data.meshes:
 				try:
 					objectID = int(mesh.name.split('-')[2])
 					objectIDList.append(objectID)
-				except:pass   
+				except:pass
 		for mesh in bpy.data.armatures:
 				try:
 					ID = int(mesh.name.split('-')[1])
 					szkieletIDList.append(ID)
-				except:pass   
+				except:pass
 		try:
 			self.meshID = max(meshIDList)+1
 		except:
@@ -581,12 +614,13 @@ class SceneIDList:
 			self.szkieletID = max(szkieletIDList)+1
 		except:
 			self.szkieletID = 0
-		scene.update()	
-			
-		
-		
-		
-		
+		#scene.update()
+		bpy.context.view_layer.update()
+
+
+
+
+
 FLT_EPSILON=0
 def quatDecompress1(s0,s1,s2):
 
@@ -628,10 +662,10 @@ def quatDecompress1(s0,s1,s2):
 		x = 1 - (y*y) - (z*z) - (w*w);
 		if (x > FLT_EPSILON):
 			x = sqrt(x);
-	return x,y,z,w		
+	return x,y,z,w
 
 
-	
+
 def quatDecompress2(s0,s1,s2):
 
 	AxisFlg = ((s1 & 1) << 1) | (s2 & 1)
@@ -648,6 +682,5 @@ def quatDecompress2(s0,s1,s2):
 	elif AxisFlg==2:return s2, s1 ,s3 ,s0
 	elif AxisFlg==1:return s2, s3, s1 ,s0
 	elif AxisFlg==0:return s3, s2, s1 ,s0
-	
-		
-		
+
+

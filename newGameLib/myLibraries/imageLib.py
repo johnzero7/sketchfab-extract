@@ -1,25 +1,11 @@
 import struct
 import os
 
-
-def imageConvert(input):
-	pvr=input.replace('.img','.pvr')
-	if os.path.exists(input)==True:
-		os.rename(input,pvr)
-		exe=toolsDir+os.sep+"PVRTexToolCLI.exe"
-		command=exe+' -i "'+pvr+'" -d -f r8g8b8a8'
-		os.system(command)
-	if os.path.exists(pvr)==True:
-		exe=toolsDir+os.sep+"PVRTexToolCLI.exe"
-		command=exe+' -i "'+pvr+'" -d -f r8g8b8a8'
-		os.system(command)
-	return pvr.replace('.pvr','.png')
-
-
 def ddsheader():
 	ddsheader = '\x44\x44\x53\x20\x7C\x00\x00\x00\x07\x10\x0A\x00\x00\x04\x00\x00\x00\x04\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x0B\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x05\x00\x00\x00\x44\x58\x54\x31\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x10\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 	return ddsheader
-   
+
+
 
 def tga_16(data):
 	newdata=''
@@ -32,10 +18,10 @@ def tga_16(data):
 		g = g * 255 / 63
 		b = b * 255 / 31
 		newdata+=struct.pack('iii',r,g,b)
-		
-	
+
+
 	return newdata
-		
+
 
 
 def RGB565_2_RGB888(szer,wys,data,outname):
@@ -48,18 +34,19 @@ def RGB565_2_RGB888(szer,wys,data,outname):
 			start+=2
 			r = (c>>11)&0x1f
 			g = (c>>5)&0x3f
-			b = c&0x001f  
+			b = c&0x001f
 			pr=(r<<3)|(r>>2)
 			pg=(g<<2)|(g>>4)
-			pb=(b<<3)|(b>>2)	
+			pb=(b<<3)|(b>>2)
 			if pr==0 and pg==0 and pb==0:
 				pa=1
 			else:
-				pa=0		
-			image.setPixelI(n, 511-m, (pr, pg, pb,pa))
+				pa=0
+			print(n, m, (pr, pg, pb,pa))
+			image.setPixelI(n, m, (pr, pg, pb,pa))
 			#newdata+=struct.pack('iii',pr,pg,pb)
 	#return newdata
-	image.save()	
+	image.save()
 
 def ARGB1555_2_ARGB8888(data):
 	newdata=''
@@ -73,8 +60,8 @@ def ARGB1555_2_ARGB8888(data):
 		integer=(a*0x1FE00) | rgb | ((rgb >> 5) & 0x070707)
 		newdata+=struct.pack('I',integer)
 	return newdata
-		
-			
+
+
 class Obrazek():
 	def __init__(self):
 		self.format=None
@@ -88,8 +75,8 @@ class Obrazek():
 				if self.szer is not None:
 					if self.name is not None:
 						if self.data is not None:
-							if os.path.exists(Blender.sys.dirname(self.name))==False:
-								os.makedirs(Blender.sys.dirname(self.name))
+							if os.path.exists(os.path.dirname(self.name))==False:
+								os.makedirs(os.path.dirname(self.name))
 							if self.format=='DXT1':
 								newfile=open(self.name,'wb')
 								newfile.write(ddsheader())
@@ -102,6 +89,38 @@ class Obrazek():
 								newfile.seek(128)
 								newfile.write(self.data)
 								newfile.close()
+
+
+
+							elif self.format=='ATI2':
+								newfile=open(self.name,'wb')
+								newfile.write("\x44\x44\x53\x20\x7C\x00\x00\x00\x07\x10\x0A\x00\xAA\xAA\xAA\xAA\xBB\xBB\xBB\xBB\xCC\xCC\xCC\xCC\x00\x00\x00\x00\xDD\xDD\xDD\xDD\x4D\x45\x52\x4C\x49\x4E\x3A\x29\x01\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x04\x00\x00\x00\x41\x54\x49\x32\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x10\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+								newfile.seek(0xC)
+								newfile.write(struct.pack('i',self.wys))
+								newfile.seek(0x10)
+								newfile.write(struct.pack('i',self.szer))
+								newfile.seek(0x54)
+								#newfile.write('DXT3')
+								newfile.seek(128)
+								newfile.write(self.data)
+								newfile.close()
+
+
+
+							elif self.format=='DXT3':
+								newfile=open(self.name,'wb')
+								newfile.write(ddsheader())
+								newfile.seek(0xC)
+								newfile.write(struct.pack('i',self.wys))
+								newfile.seek(0x10)
+								newfile.write(struct.pack('i',self.szer))
+								newfile.seek(0x54)
+								newfile.write('DXT3')
+								newfile.seek(128)
+								newfile.write(self.data)
+								newfile.close()
+
+
 							elif self.format=='DXT3':
 								newfile=open(self.name,'wb')
 								newfile.write(ddsheader())
@@ -157,20 +176,6 @@ class Obrazek():
 										id+=1"""
 								newfile.write(self.data)
 								#newfile.write(tga_16(self.data))
-								newfile.close()
-							elif self.format=='RGB2BGR':
-								newfile=open(self.name,'wb')
-								newfile.write('\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-								newfile.write(struct.pack('H',self.wys))
-								newfile.write(struct.pack('H',self.szer))
-								newfile.write('\x18\x20')
-								id=0
-								for m in range(self.szer):
-									for n in range(self.wys):
-										data=self.data[id*3:id*3+3][::-1]
-										#data.reverse()
-										newfile.write(data)
-										id+=1
 								newfile.close()
 							elif self.format=='565to888':
 								#newfile=open(self.name,'wb')
