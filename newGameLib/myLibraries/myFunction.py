@@ -250,8 +250,9 @@ def read(filename):
 def write(input,list,pad):
 	string=' '*pad
 	for item in list:
-		if type(item)==unicode:
-			string+=item.encode('utf-8')+' '
+		#print('------', type(item), item)
+		if type(item)==bytes:
+			string+=item.decode()+' '
 		else:
 			string+=str(item)+" "
 	string+='\n'

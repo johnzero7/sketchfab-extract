@@ -1,8 +1,16 @@
 import os
-import importlib
+
+from importlib import reload
+
 import newGameLib.starter
-importlib.reload(newGameLib.starter)
+
+
+reload(newGameLib.starter)
+reload(newGameLib)
+
 
 os.system('cls')
 
-newGameLib.starter.test()
+if __name__ == "__main__":
+    newGameLib.starter.test()
+

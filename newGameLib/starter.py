@@ -76,11 +76,13 @@ class BinaryReader():
 		if(os.path.exists(logDir)==False):
 			os.makedirs(logDir)
 		self.log=True
-		self.logfile=open(logDir+os.sep+os.path.basename(self.inputFile.name)+'.log','w')
+		self.logfile=open(os.path.join(logDir, os.path.basename(self.inputFile.name)+'.log'),'w')
+
 	def logClose(self):
 		self.log=False
 		if(self.logfile is not None):
 			self.logfile.close()
+
 	def logWrite(self,data):
 		if(self.logfile is not None):
 			self.logfile.write(str(data)+'\n')
@@ -89,11 +91,12 @@ class BinaryReader():
 
 	def dirname(self):
 		return os.path.dirname(self.inputFile.name)
-	def basename(self):
-		return Blender.sys.basename(self.inputFile.name).split('.')[0]
-	def ext(self):
-		return Blender.sys.basename(self.inputFile.name).split('.')[-1]
 
+	def basename(self):
+		return os.path.basename(self.inputFile.name).split('.')[0]
+
+	def ext(self):
+		return os.path.basename(self.inputFile.name).split('.')[-1]
 
 	def q(self,n):
 		offset=self.inputFile.tell()
@@ -156,7 +159,7 @@ class BinaryReader():
 
 				data = array.array('B')
 				data.fromfile(self.inputFile, n)
-				if((self.endian == ">")):
+				if(self.endian == ">"):
 					data.byteswap()
 
 
@@ -181,7 +184,7 @@ class BinaryReader():
 				#data=struct.unpack(self.endian+n*'b',self.inputFile.read(n))
 				data = array.array('b')
 				data.fromfile(self.inputFile, n)
-				if((self.endian == ">")):
+				if(self.endian == ">"):
 					data.byteswap()
 			else:
 				data=struct.unpack(self.endian+n*'b',self.inputFile.read(n))
@@ -918,7 +921,7 @@ def int3float4(input,atributes,ItemSize):
 		w=input[S+1]
 		if(c==0):
 			if(f==0):
-				if(C&-1025)!=4:
+				if((C&-1025)!=4):
 					e[A+3]=-1
 				else:
 					e[A+3]=1
@@ -1011,13 +1014,13 @@ def getAnimation(ys,A,n):
 								Offset=ys.getValue(values,b'"Offset"')
 								#write(log,[File,'Size:',Size,'Offset:',Offset,'ItemSize:',ItemSize],n+4)
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split('.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1056,13 +1059,13 @@ def getAnimation(ys,A,n):
 								#write(log,[File,'Size:',Size,'Offset:',Offset,'ItemSize:',ItemSize],n+4)
 
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1115,13 +1118,13 @@ def getAnimation(ys,A,n):
 								Offset=ys.getValue(values,'"Offset"')
 								#write(log,[File,'Size:',Size,'Offset:',Offset,'ItemSize:',ItemSize],n+4)
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1160,13 +1163,13 @@ def getAnimation(ys,A,n):
 								#write(log,[File,'Size:',Size,'Offset:',Offset,'ItemSize:',ItemSize],n+4)
 
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1190,29 +1193,29 @@ def getAnimation(ys,A,n):
 						else:
 							print('no time')
 
-			Vec3LerpChannelCompressedPacked=ys.get(a,'"osgAnimation.Vec3LerpChannelCompressedPacked"')
+			Vec3LerpChannelCompressedPacked=ys.get(a,b'"osgAnimation.Vec3LerpChannelCompressedPacked"')
 			if(Vec3LerpChannelCompressedPacked):
 
 				atributes={}
-				UserDataContainer=ys.get(Vec3LerpChannelCompressedPacked[0],'"UserDataContainer"')
+				UserDataContainer=ys.get(Vec3LerpChannelCompressedPacked[0],b'"UserDataContainer"')
 				if(UserDataContainer):
-					Values=ys.get(UserDataContainer[0],'"Values"')
+					Values=ys.get(UserDataContainer[0],b'"Values"')
 					if(Values):
 						for child in Values[0].children:
 							values=ys.values(child.data,':')
-							Name=ys.getValue(values,'"Name"')
-							Value=ys.getValue(values,'"Value"','"f"')
+							Name=ys.getValue(values,b'"Name"')
+							Value=ys.getValue(values,b'"Value"','"f"')
 							#write(log,[Name,Value],n+4)
 							atributes[Name]=Value
 
-				KeyFrames=ys.get(a,'"KeyFrames"')
+				KeyFrames=ys.get(a,b'"KeyFrames"')
 				if(KeyFrames):
 					values=ys.values(KeyFrames[0].header,':')
-					Name=ys.getValue(values,'"Name"')
-					TargetName=ys.getValue(values,'"TargetName"','""')
+					Name=ys.getValue(values,b'"Name"')
+					TargetName=ys.getValue(values,b'"TargetName"','""')
 					#write(log,['Vec3LerpChannelCompressedPacked:',Name,'TargetName:',TargetName],n+4)
 					name=getSplitName(TargetName,'_',-1)
-					if(Name=='"translate"'):
+					if(Name==b'"translate"'):
 						bone=None
 						if(TargetName in boneIndeksList):
 							#new.write(TargetName+'\x00')
@@ -1227,28 +1230,28 @@ def getAnimation(ys,A,n):
 						else:
 							print('skiped translate bone:',TargetName)
 
-						Key=ys.get(a,'"Key"')
+						Key=ys.get(a,b'"Key"')
 						if(Key):
 							values=ys.values(Key[0].data,':')
-							ItemSize=int(ys.getValue(values,'"ItemSize"'))
-							Uint16Array=ys.get(Key[0],'"Uint16Array"')
+							ItemSize=int(ys.getValue(values,b'"ItemSize"'))
+							Uint16Array=ys.get(Key[0],b'"Uint16Array"')
 							type="Uint16Array"
 							if(Uint16Array):
 								values=ys.values(Uint16Array[0].data,':')
-								File=ys.getValue(values,'"File"')
-								Size=int(ys.getValue(values,'"Size"'))
-								Offset=int(ys.getValue(values,'"Offset"'))
-								Encoding=ys.getValue(values,'"Encoding"')
+								File=ys.getValue(values,b'"File"')
+								Size=int(ys.getValue(values,b'"Size"'))
+								Offset=int(ys.getValue(values,b'"Offset"'))
+								Encoding=ys.getValue(values,b'"Encoding"')
 								#write(log,[File,'Size:',Size,'Offset:',Offset,'Encoding:',Encoding,'ItemSize:',ItemSize],n+4)
 
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1297,13 +1300,13 @@ def getAnimation(ys,A,n):
 
 
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1369,13 +1372,13 @@ def getAnimation(ys,A,n):
 							#write(log,[File,'Size:',Size,'Offset:',Offset,'ItemSize:',ItemSize],n+4)
 
 
-							path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 							if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 								cmd=Cmd()
 								cmd.input=path
 								cmd.ZIP=True
 								cmd.run()
-							path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 							if(os.path.exists(path)==False):
 								path+='.gz.txt'
 
@@ -1413,13 +1416,13 @@ def getAnimation(ys,A,n):
 							#write(log,[File,'Size:',Size,'Offset:',Offset,'ItemSize:',ItemSize],n+4)
 
 
-							path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 							if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 								cmd=Cmd()
 								cmd.input=path
 								cmd.ZIP=True
 								cmd.run()
-							path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 							if(os.path.exists(path)==False):
 								path+='.gz.txt'
 
@@ -1478,28 +1481,28 @@ def getAnimation(ys,A,n):
 						else:
 							print('skiped quaternion bone:',TargetName)
 
-						Key=ys.get(a,'"Key"')
+						Key=ys.get(a,b'"Key"')
 						if(Key):
 							values=ys.values(Key[0].data,':')
-							ItemSize=int(ys.getValue(values,'"ItemSize"'))
-							Uint16Array=ys.get(Key[0],'"Uint16Array"')
+							ItemSize=int(ys.getValue(values,b'"ItemSize"'))
+							Uint16Array=ys.get(Key[0],b'"Uint16Array"')
 							type="Uint16Array"
 							if(Uint16Array):
 								values=ys.values(Uint16Array[0].data,':')
-								File=ys.getValue(values,'"File"')
-								Size=int(ys.getValue(values,'"Size"'))
-								Offset=int(ys.getValue(values,'"Offset"'))
-								Encoding=ys.getValue(values,'"Encoding"')
+								File=ys.getValue(values,b'"File"')
+								Size=int(ys.getValue(values,b'"Size"'))
+								Offset=int(ys.getValue(values,b'"Offset"'))
+								Encoding=ys.getValue(values,b'"Encoding"')
 								#write(log,[File,'Size:',Size,'Offset:',Offset,'Encoding:',Encoding,'ItemSize:',ItemSize],n+4)
 
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1550,13 +1553,13 @@ def getAnimation(ys,A,n):
 								#write(log,[File,'Size:',Size,'Offset:',Offset,'ItemSize:',ItemSize],n+4)
 
 
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.dirname(filename)+os.sep+File.split('"')[1].split('.gz')[0]
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1688,7 +1691,7 @@ def decodeWatermark(t,e,i):
 def decodeQuantize(input,s,a,itemsize):
 	x=[0]*len(input)
 	id=0
-	for r in range(len(input)/itemsize):
+	for r in range(len(input)//itemsize):
 		for l in range(itemsize):
 			x[id]=s[l]+input[id]*a[l]
 			id+=1
@@ -1701,7 +1704,7 @@ def decodePredict(indices,input,itemsize):
 		t=input
 		e=itemsize
 		i=indices
-		n=len(t)/e
+		n=len(t)//e
 		r=[0]*n
 		a=len(i)-1
 		r[i[0]]=1
@@ -1797,7 +1800,7 @@ class Yson:
 
 	def values(self, data: bytes, type_flg: str):
 		val_list={}
-		print(f'(\'---===data:\', \'{data.decode()}\', \' type_flg:\', \'{type_flg}\')')
+		#print(f'(\'---===data:\', \'{data.decode()}\', \' type_flg:\', \'{type_flg}\')')
 		A=data.split(b',')
 		if(type_flg==':'):
 			for a in A:
@@ -1822,7 +1825,6 @@ class Yson:
 							pass
 						else:
 							string+=b.to_bytes(1,'big')
-					#print('===', string, len(string))
 					if(len(string)>0):
 						alist.append(string)
 					if(len(alist)==2):
@@ -2186,7 +2188,7 @@ def getIndices(itemsize,size,offset,type,g,mode,magic):
 	MissingCondition=skipdecode
 	if(MissingCondition!=1):
 
-		if(mode=='"TRIANGLE_STRIP"'):
+		if(mode==b'"TRIANGLE_STRIP"'):
 					k=IMPLICIT_HEADER_LENGTH+bytes[IMPLICIT_HEADER_MASK_LENGTH]
 					bytes=decodeDelta(bytes,k)
 					#write(log,[magic,k],0)
@@ -2199,7 +2201,7 @@ def getIndices(itemsize,size,offset,type,g,mode,magic):
 					#write(log,[magic],0)
 					#write(log,bytes,0)
 
-		elif(mode=='"TRIANGLES"'):
+		elif(mode==b'"TRIANGLES"'):
 					k=0
 					bytes=decodeDelta(bytes,k)
 					#write(log,[magic],0)
@@ -2224,9 +2226,8 @@ def PrimitiveSetList(ys,child):
 	for child in child.children:
 		b=child.node
 		if(b'"DrawElementsUInt"' in b.header):
-			print(f'(\'---DATA:\', \'{b.data.decode()}\')')
+			#print(f'(\'---DATA:\', \'{b.data.decode()}\')')
 			values=ys.values(b.data,':')
-			print(f'(\'---Values\', {values})')
 			mode=values[b'"Mode"']
 			Size=None
 			Offset=None
@@ -2247,12 +2248,12 @@ def PrimitiveSetList(ys,child):
 						Offset=ys.getValue(values,b'"Offset"','i')
 						Encoding=ys.getValue(values,b'"Encoding"','""')
 						#write(log,['Indice:','mode:',mode,type,'Size:',Size,'Offset:',Offset,'Encoding:',Encoding,'magic:',magic],n)
-						if(Encoding=='varint'):
-							path=os.path.dirname(ys.filename)+os.sep+"model_file.bin.gz.txt"
+						if(Encoding==b'varint'):
+							path=os.path.join(os.path.dirname(ys.filename), "model_file.bin.gz.txt")
 							if(os.path.exists(path)==False):
-								path=os.path.dirname(ys.filename)+os.sep+"model_file.bin"
+								path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 							if(os.path.exists(path)==False):
-								path=os.path.dirname(ys.filename)+os.sep+str(values[b'"File"'].split(b'"')[1])#+'.txt'
+								path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
 							if(os.path.exists(path)==True):
 								file=open(path,'rb')
 								g=BinaryReader(file)
@@ -2286,11 +2287,11 @@ def PrimitiveSetList(ys,child):
 						#write(log,['Indice:','mode:',mode,type,'Size:',Size,'Offset:',Offset,'Encoding:',Encoding,'magic:',magic],n)
 						#print(Encoding)
 						if(Encoding==b'varint'):
-							path=os.path.dirname(ys.filename)+os.sep+"model_file.bin.gz.txt"
+							path=os.path.join(os.path.dirname(ys.filename), "model_file.bin.gz.txt")
 							if(os.path.exists(path)==False):
-								path=os.path.dirname(ys.filename)+os.sep+"model_file.bin"
+								path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 							if(os.path.exists(path)==False):
-								path=os.path.dirname(ys.filename)+os.sep+str(values[b'"File"'].split(b'"')[1])#+'.txt'
+								path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
 							if(os.path.exists(path)==True):
 								file=open(path,'rb')
 								g=BinaryReader(file)
@@ -2298,11 +2299,11 @@ def PrimitiveSetList(ys,child):
 								indiceArray.append([indiceList,mode])
 								file.close()
 						else:
-							path=os.path.dirname(ys.filename)+os.sep+"model_file.bin.gz.txt"
+							path=os.path.join(os.path.dirname(ys.filename), "model_file.bin.gz.txt")
 							if(os.path.exists(path)==False):
-								path=os.path.dirname(ys.filename)+os.sep+"model_file.bin"
+								path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 							if(os.path.exists(path)==False):
-								path=os.path.dirname(ys.filename)+os.sep+str(values[b'"File"'].split(b'"')[1])#+'.txt'
+								path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
 							if(os.path.exists(path)==True):
 								file=open(path,'rb')
 								g=BinaryReader(file)
@@ -2335,11 +2336,11 @@ def PrimitiveSetList(ys,child):
 						Offset=ys.getValue(values,b'"Offset"','i')
 						Encoding=ys.getValue(values,b'"Encoding"','""')
 						#write(log,['Indice:','mode:',mode,type,'Size:',Size,'Offset:',Offset,'Encoding:',Encoding,'magic:',magic],n)
-						path=os.path.dirname(ys.filename)+os.sep+"model_file.bin.gz.txt"
+						path=os.path.join(os.path.dirname(ys.filename), "model_file.bin.gz.txt")
 						if(os.path.exists(path)==False):
-							path=os.path.dirname(ys.filename)+os.sep+"model_file.bin"
+							path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 						if(os.path.exists(path)==False):
-							path=os.path.dirname(ys.filename)+os.sep+str(values[b'"File"'].split(b'"')[1])#+'.txt'
+							path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
 						if(os.path.exists(path)==True):
 							file=open(path,'rb')
 							g=BinaryReader(file)
@@ -2555,7 +2556,7 @@ def osgGeometry(ys,parentNewNode):
 				if(b'"Color"' in child.node.header):
 					mesh.colorArray=Color(ys,child.node)
 		if(b'"PrimitiveSetList"' in child.node.header):
-			mesh.indiceArray=PrimitiveSetList(ys,child)  #TODO ---===
+			mesh.indiceArray=PrimitiveSetList(ys,child)
 		if(b'"UserDataContainer"' in child.node.header):
 			mesh.atributes=UserDataContainer(ys,child)
 	return mesh
@@ -2657,27 +2658,27 @@ def drawMesh(ys,mesh):
 			mat.IDStart=len(mesh.indiceList)
 			mat.IDCount=len(indices)
 			mesh.indiceList.extend(indices)
-			if(mode=='"TRIANGLE_STRIP"'):
+			if(mode==b'"TRIANGLE_STRIP"'):
 				mat.TRISTRIP=True
-			if(mode=='"TRIANGLES"'):
+			if(mode==b'"TRIANGLES"'):
 				mat.TRIANGLE=True
 
 		indices=mesh.indiceArray[0][0]
 		mode=mesh.indiceArray[0][1]
 	if(len(mesh.vertexArray)==1):
-		if(mesh.vertexArray[0][1]=='"varint"'):
+		if(mesh.vertexArray[0][1]==b'"varint"'):
 			if(mode):
 				bytes=mesh.vertexArray[0][0]
 				ItemSize=mesh.vertexArray[0][2]
-				if(mode=='"TRIANGLE_STRIP"'):
+				if(mode==b'"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices,bytes,ItemSize)
-				s1=float(mesh.atributes['vtx_bbl_x'])
-				s2=float(mesh.atributes['vtx_bbl_y'])
-				s3=float(mesh.atributes['vtx_bbl_z'])
+				s1=float(mesh.atributes[b'vtx_bbl_x'])
+				s2=float(mesh.atributes[b'vtx_bbl_y'])
+				s3=float(mesh.atributes[b'vtx_bbl_z'])
 				s=[s1,s2,s3]
-				a1=float(mesh.atributes['vtx_h_x'])
-				a2=float(mesh.atributes['vtx_h_y'])
-				a3=float(mesh.atributes['vtx_h_z'])
+				a1=float(mesh.atributes[b'vtx_h_x'])
+				a2=float(mesh.atributes[b'vtx_h_y'])
+				a3=float(mesh.atributes[b'vtx_h_z'])
 				a=[a1,a2,a3]
 				floats=decodeQuantize(bytes,s,a,ItemSize)
 				mesh.vertPosList=[floats[m:m+ItemSize]for m in range(0,len(floats),3)]
@@ -2689,17 +2690,17 @@ def drawMesh(ys,mesh):
 			mesh.vertPosList=list
 
 	if(len(mesh.TexCoord0Array)==1):
-		if(mesh.TexCoord0Array[0][1]=='"varint"'):
+		if(mesh.TexCoord0Array[0][1]==b'"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord0Array[0][0]
 				ItemSize=mesh.TexCoord0Array[0][2]
-				if(mode=='"TRIANGLE_STRIP"'):
+				if(mode==b'"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices,bytes,ItemSize)
-				s1=float(mesh.atributes['uv_0_bbl_x'])
-				s2=float(mesh.atributes['uv_0_bbl_y'])
+				s1=float(mesh.atributes[b'uv_0_bbl_x'])
+				s2=float(mesh.atributes[b'uv_0_bbl_y'])
 				s=[s1,s2]
-				a1=float(mesh.atributes['uv_0_h_x'])
-				a2=float(mesh.atributes['uv_0_h_y'])
+				a1=float(mesh.atributes[b'uv_0_h_x'])
+				a2=float(mesh.atributes[b'uv_0_h_y'])
 				a=[a1,a2]
 				floats=decodeQuantize(bytes,s,a,ItemSize)
 				for m in range(0,len(floats),ItemSize):
@@ -2709,17 +2710,17 @@ def drawMesh(ys,mesh):
 			list=mesh.TexCoord0Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord1Array)==1):
-		if(mesh.TexCoord1Array[0][1]=='"varint"'):
+		if(mesh.TexCoord1Array[0][1]==b'"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord1Array[0][0]
 				ItemSize=mesh.TexCoord1Array[0][2]
-				if(mode=='"TRIANGLE_STRIP"'):
+				if(mode==b'"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices,bytes,ItemSize)
-				s1=float(mesh.atributes['uv_1_bbl_x'])
-				s2=float(mesh.atributes['uv_1_bbl_y'])
+				s1=float(mesh.atributes[b'uv_1_bbl_x'])
+				s2=float(mesh.atributes[b'uv_1_bbl_y'])
 				s=[s1,s2]
-				a1=float(mesh.atributes['uv_1_h_x'])
-				a2=float(mesh.atributes['uv_1_h_y'])
+				a1=float(mesh.atributes[b'uv_1_h_x'])
+				a2=float(mesh.atributes[b'uv_1_h_y'])
 				a=[a1,a2]
 				floats=decodeQuantize(bytes,s,a,ItemSize)
 				for m in range(0,len(floats),ItemSize):
@@ -2729,17 +2730,17 @@ def drawMesh(ys,mesh):
 			list=mesh.TexCoord1Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord3Array)==1):
-		if(mesh.TexCoord3Array[0][1]=='"varint"'):
+		if(mesh.TexCoord3Array[0][1]==b'"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord3Array[0][0]
 				ItemSize=mesh.TexCoord3Array[0][2]
-				if(mode=='"TRIANGLE_STRIP"'):
+				if(mode==b'"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices,bytes,ItemSize)
-				s1=float(mesh.atributes['uv_3_bbl_x'])
-				s2=float(mesh.atributes['uv_3_bbl_y'])
+				s1=float(mesh.atributes[b'uv_3_bbl_x'])
+				s2=float(mesh.atributes[b'uv_3_bbl_y'])
 				s=[s1,s2]
-				a1=float(mesh.atributes['uv_3_h_x'])
-				a2=float(mesh.atributes['uv_3_h_y'])
+				a1=float(mesh.atributes[b'uv_3_h_x'])
+				a2=float(mesh.atributes[b'uv_3_h_y'])
 				a=[a1,a2]
 				floats=decodeQuantize(bytes,s,a,ItemSize)
 				for m in range(0,len(floats),ItemSize):
@@ -2749,17 +2750,17 @@ def drawMesh(ys,mesh):
 			list=mesh.TexCoord3Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord5Array)==1):
-		if(mesh.TexCoord5Array[0][1]=='"varint"'):
+		if(mesh.TexCoord5Array[0][1]==b'"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord5Array[0][0]
 				ItemSize=mesh.TexCoord5Array[0][2]
-				if(mode=='"TRIANGLE_STRIP"'):
+				if(mode==b'"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices,bytes,ItemSize)
-				s1=float(mesh.atributes['uv_5_bbl_x'])
-				s2=float(mesh.atributes['uv_5_bbl_y'])
+				s1=float(mesh.atributes[b'uv_5_bbl_x'])
+				s2=float(mesh.atributes[b'uv_5_bbl_y'])
 				s=[s1,s2]
-				a1=float(mesh.atributes['uv_5_h_x'])
-				a2=float(mesh.atributes['uv_5_h_y'])
+				a1=float(mesh.atributes[b'uv_5_h_x'])
+				a2=float(mesh.atributes[b'uv_5_h_y'])
 				a=[a1,a2]
 				floats=decodeQuantize(bytes,s,a,ItemSize)
 				for m in range(0,len(floats),ItemSize):
@@ -2769,17 +2770,17 @@ def drawMesh(ys,mesh):
 			list=mesh.TexCoord5Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord6Array)==1):
-		if(mesh.TexCoord6Array[0][1]=='"varint"'):
+		if(mesh.TexCoord6Array[0][1]==b'"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord6Array[0][0]
 				ItemSize=mesh.TexCoord6Array[0][2]
-				if(mode=='"TRIANGLE_STRIP"'):
+				if(mode==b'"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices,bytes,ItemSize)
-				s1=float(mesh.atributes['uv_6_bbl_x'])
-				s2=float(mesh.atributes['uv_6_bbl_y'])
+				s1=float(mesh.atributes[b'uv_6_bbl_x'])
+				s2=float(mesh.atributes[b'uv_6_bbl_y'])
 				s=[s1,s2]
-				a1=float(mesh.atributes['uv_6_h_x'])
-				a2=float(mesh.atributes['uv_6_h_y'])
+				a1=float(mesh.atributes[b'uv_6_h_x'])
+				a2=float(mesh.atributes[b'uv_6_h_y'])
 				a=[a1,a2]
 				floats=decodeQuantize(bytes,s,a,ItemSize)
 				for m in range(0,len(floats),ItemSize):
@@ -2811,7 +2812,7 @@ def UserDataContainer(ys,b):
 def osgNode(ys,parentNewNode,parentBone):
 	for child in parentNewNode.children:
 		for child in child.children:
-			print(f'(\'---child\', \'{child.node.header.decode()}\')')
+			#print(f'(\'---child\', \'{child.node.header.decode()}\')')
 			if(b'"osg.Geometry"' in child.node.header):
 				mesh=osgGeometry(ys,child)
 				mesh.parentBone=parentBone
@@ -3121,9 +3122,9 @@ def htmParser(filename):
 				if(url):
 					basename=os.path.basename(url)
 					if('.jpeg' in basename):
-						path=sys.dir+os.sep+os.path.basename(url)+'.jpg'
+						path=os.path.join(sys.dir, os.path.basename(url)+'.jpg')
 					else:
-						path=sys.dir+os.sep+os.path.basename(url)
+						path=os.path.join(sys.dir, os.path.basename(url))
 					exists=os.path.exists(path)
 					#print('ikona',exists,os.path.basename(url)+'.jpg')
 					if(exists==True):
@@ -3136,13 +3137,13 @@ def htmParser(filename):
 		#print(ikona)
 		for file in os.listdir(sys.dir):
 			if('.htm' in file):
-				if(os.path.exists(sys.dir+os.sep+file+".thumb.10.png")==False):
+				if(os.path.exists(os.path.join(sys.dir, file+".thumb.10.png"))==False):
 					if(os.path.exists(ikona)):
-						os.rename(ikona,sys.dir+os.sep+file+".thumb.10.png")
+						os.rename(ikona,os.path.join(sys.dir, file+".thumb.10.png"))
 				else:
-					if(os.path.exists(sys.dir+os.sep+file+".thumb.11.png")==False):
+					if(os.path.exists(os.path.join(sys.dir, file+".thumb.11.png"))==False):
 						if(os.path.exists(ikona)):
-							os.rename(ikona,sys.dir+os.sep+file+".thumb.11.png")
+							os.rename(os.path.join(ikona,sys.dir, file+".thumb.11.png"))
 
 
 
@@ -3212,9 +3213,9 @@ def htmParser(filename):
 								if(url):
 									basename=os.path.basename(url)
 									if('.jpeg' in basename):
-										path=sys.dir+os.sep+os.path.basename(url)+'.jpg'
+										path=os.path.join(sys.dir, os.path.basename(url)+'.jpg')
 									else:
-										path=sys.dir+os.sep+os.path.basename(url)
+										path=os.path.join(sys.dir, os.path.basename(url))
 									exists=os.path.exists(path)
 									write(log,['path:',path,exists],12)
 
@@ -3419,10 +3420,8 @@ def Parser(path):
 	filename=path
 	sys=Sys(filename)
 	#os.system("cls")
-	print(f'filename: {filename}')
 	basename = os.path.basename(filename)
 	_, ext = os.path.splitext(basename)
-	print(f'xxx {ext}')
 	if(ext=='.gz'):
 		osg=os.path.join(sys.dir, 'file.osgjs')
 		if(os.path.exists(osg)==False):
@@ -3504,12 +3503,12 @@ def Parser(path):
 
 
 
-					osgPath=sys.dir+os.sep+'file.osgjs'
+					osgPath=os.path.join(sys.dir, 'file.osgjs')
 					if(os.path.exists(osgPath)==True):
 						osgParser(osgPath)
 						pass
 					else:
-						osgPath=sys.dir+os.sep+'file.osgjs.gz.txt'
+						osgPath=os.path.join(sys.dir, 'file.osgjs.gz.txt')
 						if(os.path.exists(osgPath)==True):
 							osgParser(osgPath)
 							pass
@@ -3589,18 +3588,16 @@ def unregister():
 	bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
 
 
+#Blender.Window.FileSelector(Parser,'import','htm files: *.... - model')
+
 def test():
 	os.system('cls')
 	Parser(r'C:\Users\Rodrigo\Downloads\sketchfab\PythonRipper\Models\Maria Naruse\file.osgjs')
 
-#Blender.Window.FileSelector(Parser,'import','htm files: *.... - model')
-
 if(__name__ == "__main__"):
+	test()
 	#register()
 	# test call
 	#bpy.ops.import_test.some_data('INVOKE_DEFAULT')
 	#unregister()
-
-	os.system('cls')
-	Parser(r'C:\Users\Rodrigo\Downloads\sketchfab\PythonRipper\Models\Maria Naruse\file.osgjs')
 

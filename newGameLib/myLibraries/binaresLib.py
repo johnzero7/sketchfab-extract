@@ -1070,14 +1070,3 @@ class Sys(object):
 			returnPath=path
 		return returnPath
 
-
-
-
-
-
-
-
-
-
-
-

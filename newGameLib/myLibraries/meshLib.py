@@ -8,6 +8,7 @@ import os
 
 
 
+
 def setBox(box,meshList):
 	E=[[],[],[]]
 	for mesh in meshList:
@@ -198,14 +199,14 @@ class Model:
 			if len(mesh.vertPosList)>0:
 				if mesh.SPLIT==False:
 					if mesh.object:
-						mesh.object.setName(mesh.object.name+'-'+str(i))
+						mesh.object.name = mesh.object.name+'-'+str(i)
 				file.write('matCount'+'|'+str(len(mesh.matList))+'\n')
 				for j,mat in enumerate(mesh.matList):
 					if mesh.SPLIT==False:
 						file.write(mat.name+'|'+mesh.object.name+'\n')
 					if mesh.SPLIT==True:
 						if mat.object:
-							mat.object.setName(mat.object.name+'-'+str(i))
+							mat.object.name = mat.object.name+'-'+str(i)
 							file.write(mat.name+'|'+mat.object.name+'\n')
 		file.close()
 
@@ -324,6 +325,7 @@ class Mesh():
 
 	def addMat(self,mat,mesh,matID):
 		mat.name=mesh.name.split('-')[0]+'-'+str(matID)+'-'+str(self.sceneIDList.objectID)
+		return
 		blendMat=Blender.Material.New(mat.name)
 		blendMat.setRms(0.04)
 		blendMat.shadeMode=Blender.Material.ShadeModes.CUBIC
@@ -350,38 +352,51 @@ class Mesh():
 
 
 	def addvertexUV(self,blenderMesh,mesh):
-		blenderMesh.vertexUV = 1
-		for m in range(len(blenderMesh.verts)):
-			if self.UVFLIP==False:blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m][0],1-mesh.vertUVList[m][1])
-			else:blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m])
+		pass # DEPRECADO "stiky UV"
+		# blenderMesh.vertexUV = 1
+		#for m in range(len(blenderMesh.vertices)):
+		#	if self.UVFLIP==False:
+		#		blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m][0], 1-mesh.vertUVList[m][1])
+		#	else:
+		#		blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m])
 
 
 	def addfaceUV(self,blenderMesh,mesh):
-		if len(blenderMesh.faces)>0:
-			blenderMesh.faceUV = 1
-			if len(mesh.vertUVList)>0:
-				for ID in range(len(blenderMesh.faces)):
-					face=blenderMesh.faces[ID]
-					face.uv = [v.uvco for v in face.verts]
+		if len(blenderMesh.polygons)>0:
+			blenderMesh.uv_layers.new()
+			if len(mesh.vertUVList)>0 and False:
+				for poly in(blenderMesh.polygons):
+					###
+					if self.UVFLIP==True:
+						blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m])
+					else:
+						blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m][0], 1-mesh.vertUVList[m][1])
+
+
+
+					face.uv = [v.uvco for v in poly.vertices]
 					face.smooth = 1
 					if len(mesh.matIDList)>0:
 						if ID<len(mesh.matIDList):
 							face.mat=mesh.matIDList[ID]
 			if len(mesh.matIDList)>0:
-				for ID in range(len(blenderMesh.faces)):
-					face=blenderMesh.faces[ID]
-					face.smooth = 1
+				for ID in range(len(blenderMesh.polygons)):
+					face=blenderMesh.polygons[ID]
+					#face.smooth = 1
 					#print(ID,len(mesh.matIDList))
 					if ID<len(mesh.matIDList):
-						face.mat=mesh.matIDList[ID]
+						pass
+						#face.mat=mesh.matIDList[ID]
 			if len(mesh.faceUVList)>0:
-				for ID in range(len(blenderMesh.faces)):
-					face=blenderMesh.faces[ID]
+				for ID in range(len(blenderMesh.polygons)):
+					face=blenderMesh.polygons[ID]
 					if mesh.faceUVList[ID] is not None:
-						face.uv=mesh.faceUVList[ID]
+						pass
+						#face.uv=mesh.faceUVList[ID]
 			if len(self.vertNormList)==0:
-				blenderMesh.calcNormals()
-			blenderMesh.update()
+				pass
+				#blenderMesh.calcNormals()
+			#blenderMesh.update()
 
 	def addSkinIDList(self):
 		if len(self.skinIDList)==0:
@@ -592,12 +607,17 @@ class Mesh():
 
 	def addMesh(self):
 		self.mesh = bpy.data.meshes.new(self.name)
-		self.mesh.verts.extend(self.vertPosList)
+		#print('---addMesh...')
+		#print('----self.vertPosList', self.vertPosList)
+		#print('----self.triangleList', self.triangleList)
+		#self.mesh.verts.extend(self.vertPosList)
 		if len(self.vertNormList)>0:
-			for i,vert in enumerate(self.mesh.verts):vert.no=Vector(self.vertNormList[i])
-		self.mesh.faces.extend(self.triangleList,ignoreDups=True)
+			for i,vert in enumerate(self.mesh.verts):
+				vert.no=Vector(self.vertNormList[i])
+		self.mesh.from_pydata(self.vertPosList, [], self.triangleList)
 		scene = bpy.context.scene
-		self.object = scene.objects.new(self.mesh,self.name)
+		self.object = bpy.data.objects.new(self.name, self.mesh)
+		scene.collection.objects.link(self.object)
 
 
 	def setSkeletonParent(self,skeletonName):
@@ -611,6 +631,7 @@ class Mesh():
 
 
 	def draw(self,id=None):
+		#print('---draw...')
 		self.sceneIDList=SceneIDList()
 		if not self.name:
 			self.name=str(self.sceneIDList.meshID).zfill(3)+'-0-'+str(self.sceneIDList.objectID)
@@ -638,19 +659,19 @@ class Mesh():
 
 			if self.BINDSKELETON is not None:
 				scene = bpy.context.scene
-				for object in scene.objects:
-					if object.name==self.BINDSKELETON:
-						skeletonMatrix=self.object.getMatrix()*object.mat
-						#self.object.setMatrix(skeletonMatrix)
-						object.makeParentDeform([self.object],1,0)
-			if len(self.skinIndiceList)>0 and len(self.skinWeightList)>0:
+				object = scene.objects.get(self.BINDSKELETON)
+				if object:
+					skeletonMatrix=self.object.matrix_world @ object.matrix_world
+					#self.object.setMatrix(skeletonMatrix)
+					#object.makeParentDeform([self.object],1,0)
+			if len(self.skinIndiceList)>0 and len(self.skinWeightList)>0 and False:
 				if len(self.skinIndiceList)==len(self.skinWeightList)>0:
 					try:
 						self.addSkinIDList()
 						self.addSkinWithIndiceList(self.mesh,self)
 					except:
 						print('WARNING:self.addSkinWithIndiceList:',self.mesh.name)
-			if len(self.skinGroupList)>0 and len(self.skinWeightList)>0:
+			if len(self.skinGroupList)>0 and len(self.skinWeightList)>0 and False:
 				if len(self.skinGroupList)==len(self.skinWeightList)>0:
 					#print('addSkinWithGroupList')
 					try:
@@ -659,7 +680,7 @@ class Mesh():
 					except:
 						print('WARNING:self.addSkinWithGroupList:',self.mesh.name)
 
-			if len(self.vertColList)==len(self.vertPosList):
+			if len(self.vertColList)==len(self.vertPosList) and False:
 				if len(self.triangleList)>0:
 					self.mesh.vertexColors = 1
 					for face in self.mesh.faces:
@@ -672,7 +693,7 @@ class Mesh():
 					print('MESH UZYWA VERTEX COLOR')
 				else:
 					print('MESH NIE UZYWA VERTEX COLOR:',self.mesh.name,len(self.triangleList))
-			Blender.Window.RedrawAll()
+			#Blender.Window.RedrawAll()
 
 
 
@@ -913,16 +934,16 @@ class Mat:
 		b=random.randint(0,255)
 		self.rgba=[r/255.0,g/255.0,b/255.0,1.0]
 
-		self.TexCoUV=Blender.Texture.TexCo.UV
-		self.MapToCOL=Blender.Texture.MapTo.COL
-		self.MapToALPHA=Blender.Texture.MapTo.ALPHA
-		self.MapToNOR=Blender.Texture.MapTo.NOR
-		self.MapToCSP=Blender.Texture.MapTo.CSP
-		self.MapToSPEC=Blender.Texture.MapTo.SPEC
+		self.TexCoUV=None
+		self.MapToCOL=None
+		self.MapToALPHA=None
+		self.MapToNOR=None
+		self.MapToCSP=None
+		self.MapToSPEC=None
 
 	def setDiffuse(self,blendMat):
 		img=getImageFromBlender(self.diffuse)
-		if img:
+		if img and False:
 			imgName=blendMat.name+'-d'
 			img.setName(imgName)
 			texname=blendMat.name+'-d'
@@ -933,7 +954,7 @@ class Mat:
 
 	def setDiffuse2(self,blendMat):
 		img=getImageFromBlender(self.diffuse2)
-		if img:
+		if img and False:
 			imgName=blendMat.name+'-d2'
 			img.setName(imgName)
 			texname=blendMat.name+'-d2'
@@ -948,7 +969,7 @@ class Mat:
 
 	def setNormal(self,blendMat):
 		img=getImageFromBlender(self.normal)
-		if img:
+		if img and False:
 			imgName=blendMat.name+'-n'
 			img.setName(imgName)
 			texname=blendMat.name+'-n'
@@ -960,7 +981,7 @@ class Mat:
 
 	def setSpecular(self,blendMat):
 		img=getImageFromBlender(self.specular)
-		if img:
+		if img and False:
 			imgName=blendMat.name+'-s'
 			img.setName(imgName)
 			texname=blendMat.name+'-s'
@@ -975,7 +996,7 @@ class Mat:
 
 	def setAo(self,blendMat):
 		img=getImageFromBlender(self.ao)
-		if img:
+		if img and False:
 			imgName=blendMat.name+'-ao'
 			img.setName(imgName)
 			texname=blendMat.name+'-ao'
@@ -988,7 +1009,7 @@ class Mat:
 
 	def setTransparent(self,blendMat):
 		img=getImageFromBlender(self.trans)
-		if img:
+		if img and False:
 			imgName=blendMat.name+'-a'
 			img.setName(imgName)
 			texname=blendMat.name+'-a'

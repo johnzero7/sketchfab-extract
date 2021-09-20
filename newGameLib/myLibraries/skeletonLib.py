@@ -1,7 +1,7 @@
-import bpy
-
+#import Blender
 from .myFunction import *
 from mathutils import *
+import bpy
 
 #Strife Online nowy euler
 

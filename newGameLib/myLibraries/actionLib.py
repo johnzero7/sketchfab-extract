@@ -1,8 +1,9 @@
 import bpy
+#import Blender
 from mathutils import *
 
 """
-			euler = mathutils.Euler()
+			euler = Blender.Mathutils.Euler()
 			RotateEuler(euler,z,'z')
 			RotateEuler(euler,x,'x')
 			RotateEuler(euler,y,'y')
