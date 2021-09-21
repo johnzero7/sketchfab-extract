@@ -363,20 +363,19 @@ class Mesh():
 
 	def addfaceUV(self,blenderMesh,mesh):
 		if len(blenderMesh.polygons)>0:
-			blenderMesh.uv_layers.new()
-			if len(mesh.vertUVList)>0 and False:
+			uv_layer = blenderMesh.uv_layers.new()
+			if len(mesh.vertUVList)>0:
 				for poly in(blenderMesh.polygons):
-					###
-					if self.UVFLIP==True:
-						blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m])
-					else:
-						blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m][0], 1-mesh.vertUVList[m][1])
+					poly.use_smooth = True
+					for loop_index in poly.loop_indices:
+						vertex_index = blenderMesh.loops[loop_index].vertex_index
+						if self.UVFLIP==True:
+							uv_layer.data[loop_index].uv = Vector(mesh.vertUVList[vertex_index])
+						else:
+							uv_layer.data[loop_index].uv = Vector((mesh.vertUVList[vertex_index][0], 1-mesh.vertUVList[vertex_index][1]))
 
 
-
-					face.uv = [v.uvco for v in poly.vertices]
-					face.smooth = 1
-					if len(mesh.matIDList)>0:
+					if len(mesh.matIDList)>0 and False:
 						if ID<len(mesh.matIDList):
 							face.mat=mesh.matIDList[ID]
 			if len(mesh.matIDList)>0:
