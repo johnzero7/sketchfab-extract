@@ -477,36 +477,34 @@ def roundMatrix(mat,dec=17):
 	fmat = []
 	for row in mat:
 		fmat.append(roundVector(row,dec))
-	return Matrix(*fmat)
+	return Matrix(fmat)
 
 def Matrix4x4(data):
-	return Matrix(  data[:4],\
-					data[4:8],\
-					data[8:12],\
-					data[12:16])
+	return Matrix(( data[:4],
+					data[4:8],
+					data[8:12],
+					data[12:16]))
 
 def Matrix3x3(data):
-	return Matrix(  data[:3],\
-					data[3:6],\
-					data[6:9])
+	return Matrix(( data[:3],
+					data[3:6],
+					data[6:9]))
 
 
 def Matrix4x3(data):
-	#print(data)
-	data=list(data)
-	return Matrix(  data[:3]+[0.0],\
-					data[3:6]+[0.0],\
-					data[6:9]+[0.0],\
-					data[9:12]+[1.0])
+	return Matrix((  data[:3]+[0.0],
+					data[3:6]+[0.0],
+					data[6:9]+[0.0],
+					data[9:12]+[1.0]))
 
 
 def VectorScaleMatrix(scale):
-	mat = mathutils.Matrix(
+	mat = mathutils.Matrix((
 			[1, 0, 0, 0],
 			[0, 1, 0, 0],
 			[0, 0, 1, 0],
 			[0, 0, 0, 1],
-			)
+			))
 	mat *= mathutils.ScaleMatrix(scale[0], 4, mathutils.Vector([1, 0, 0]))
 	mat *= mathutils.ScaleMatrix(scale[1], 4, mathutils.Vector([0, 1, 0]))
 	mat *= mathutils.ScaleMatrix(scale[2], 4, mathutils.Vector([0, 0, 1]))

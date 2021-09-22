@@ -24,9 +24,9 @@ class Bone:
 		self.quat=None
 		self.pos=None
 		self.matrix=None
-		self.posMatrix=Matrix().resize4x4()
-		self.rotMatrix=Matrix().resize4x4()
-		self.scaleMatrix=Matrix().resize4x4()
+		self.posMatrix=Matrix()
+		self.rotMatrix=Matrix()
+		self.scaleMatrix=Matrix()
 		self.children=[]
 		self.edit=None
 		self.tail=None
@@ -197,7 +197,8 @@ class Skeleton:
 
 
 	def create_bones(self):
-		self.armature.makeEditable()
+		bpy.context.view_layer.objects.active = self.object
+		bpy.ops.object.mode_set(mode='EDIT')
 		boneList=[]
 		for bone in self.armature.bones.values():
 			if bone.name not in boneList:
@@ -207,21 +208,22 @@ class Skeleton:
 			if self.debug is not None:
 				self.debugFile.write(name+'\n')
 			if name is None:
-				name=str(boneID)
+				name=str(boneID).encode()
 				self.boneList[boneID].name=name
 			self.boneNameList.append(name)
 			if name not in boneList:
-				eb = Blender.Armature.Editbone()
-				self.armature.bones[name] = eb
-		self.armature.update()
+				eb = self.armature.edit_bones.new(name.decode())
+				eb.length = 1
+		bpy.ops.object.mode_set(mode='OBJECT')
 
 	def create_bone_connection(self):
-		self.armature.makeEditable()
+		bpy.context.view_layer.objects.active = self.object
+		bpy.ops.object.mode_set(mode='EDIT')
 		for boneID in range(len(self.boneList)):
 			name=self.boneList[boneID].name
 			if name is None:
-				name=str(boneID)
-			bone=self.armature.bones[name]
+				name=str(boneID).encode()
+			bone=self.armature.edit_bones[name.decode()]
 			parentID=None
 			parentName=None
 			if self.boneList[boneID].parentID is not None:
@@ -231,7 +233,7 @@ class Skeleton:
 			if self.boneList[boneID].parentName is not None:
 				parentName=self.boneList[boneID].parentName
 			if parentName is not None:
-				parent=self.armature.bones[parentName]
+				parent=self.armature.edit_bones[parentName.decode()]
 				if parentID is not None:
 					if parentID!=-1:
 						bone.parent=parent
@@ -241,37 +243,36 @@ class Skeleton:
 			else:
 				if self.WARNING==True:
 					print('WARNING: no parent for bone',name)
-		self.armature.update()
+		bpy.ops.object.mode_set(mode='OBJECT')
 
 
 
 	def create_bone_position(self):
-		self.armature.makeEditable()
+		bpy.context.view_layer.objects.active = self.object
+		bpy.ops.object.mode_set(mode='EDIT')
 		for m in range(len(self.boneList)):
 			name=self.boneList[m].name
 			rotMatrix=self.boneList[m].rotMatrix
 			posMatrix=self.boneList[m].posMatrix
 			scaleMatrix=self.boneList[m].scaleMatrix
 			matrix=self.boneList[m].matrix
-			bone = self.armature.bones[name]
+			bone = self.armature.edit_bones[name.decode()]
 			if matrix:
 				if self.ARMATURESPACE==True:
 					bone.matrix=matrix
 					if self.NICE==True:
-							bvec = bone.tail- bone.head
-							bvec.normalize()
-							bone.tail = bone.head + self.param* bvec
+    						bone.lenght = self.param
 				elif self.BONESPACE==True:
 					rotMatrix=matrix.rotationPart()
 					posMatrix=matrix.translationPart()
 					scalePart=matrix.scalePart()
 					if bone.parent:
-						bone.head =   posMatrix * bone.parent.matrix+bone.parent.head
+						bone.head =   posMatrix @ bone.parent.matrix + bone.parent.head
 						if self.boneList[m].transform not in ["noRotationOrReflection","onlyTranslation"]:
-							tempM = rotMatrix * bone.parent.matrix
+							tempM = rotMatrix @ bone.parent.matrix
 							bone.matrix = tempM
 						else:
-							tempM = rotMatrix# * bone.parent.matrix
+							tempM = rotMatrix # * bone.parent.matrix
 							bone.matrix = tempM
 					else:
 						bone.head = posMatrix
@@ -283,11 +284,11 @@ class Skeleton:
 				elif self.INVERTSPACE==True:
 					rotMatrix=matrix.rotationPart()
 					posMatrix=matrix.translationPart()
-					posMatrix=posMatrix*rotMatrix.invert()
+					posMatrix=posMatrix @ rotMatrix.invert()
 					posMatrix.negate()
 					if bone.parent:
 						bone.head =   posMatrix
-						tempM = bone.parent.matrix*rotMatrix
+						tempM = bone.parent.matrix @ rotMatrix
 						bone.matrix = tempM
 					else:
 						bone.head = posMatrix
@@ -339,8 +340,8 @@ class Skeleton:
 				if self.WARNING==True:
 					print('WARNINIG: rotMatrix or posMatrix or matrix is None')
 
-		self.armature.update()
-		Blender.Window.RedrawAll()
+		bpy.ops.object.mode_set(mode='OBJECT')
+		#Blender.Window.RedrawAll()
 
 
 

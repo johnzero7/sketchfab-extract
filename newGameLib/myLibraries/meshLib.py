@@ -325,30 +325,24 @@ class Mesh():
 
 	def addMat(self,mat,mesh,matID):
 		mat.name=mesh.name.split('-')[0]+'-'+str(matID)+'-'+str(self.sceneIDList.objectID)
-		return
-		blendMat=Blender.Material.New(mat.name)
-		blendMat.setRms(0.04)
-		blendMat.shadeMode=Blender.Material.ShadeModes.CUBIC
-		if mat.rgbCol is None:
-			#blendMat.rgbCol=mat.rgba[:3]
-			#blendMat.alpha = mat.rgba[3]
-			pass
-		else:
-			blendMat.rgbCol=mat.rgbCol[:3]
-			blendMat.alpha = mat.rgba[3]
+		blendMat = bpy.data.materials.new(mat.name)
+		blendMat.use_nodes = True
+		if mat.rgbCol is not None:
+			blendMat.diffuse_color=mat.rgbCol
 		if mat.rgbSpec is not None:
-			blendMat.specCol=mat.rgbSpec[:3]
+			blendMat.roughness=mat.rgbSpec[:3]
 		if mat.ZTRANS==True:
-			blendMat.mode |= Blender.Material.Modes.ZTRANSP
-			blendMat.mode |= Blender.Material.Modes.TRANSPSHADOW
-			blendMat.alpha = 0.0
-		if mat.diffuse:mat.setDiffuse(blendMat)
-		if mat.diffuse2:mat.setDiffuse2(blendMat)
-		if mat.specular:mat.setSpecular(blendMat)
-		if mat.normal:mat.setNormal(blendMat)
-		if mat.ao:mat.setAo(blendMat)
-		if mat.trans:mat.setTransparent(blendMat)
-		mesh.materials+=[blendMat]
+			blendMat.blend_method = 'BLEND'
+			blendMat.shadow_method = 'OPAQUE'
+
+		#TODO create node material
+		#if mat.diffuse:mat.setDiffuse(blendMat)
+		#if mat.diffuse2:mat.setDiffuse2(blendMat)
+		#if mat.specular:mat.setSpecular(blendMat)
+		#if mat.normal:mat.setNormal(blendMat)
+		#if mat.ao:mat.setAo(blendMat)
+		#if mat.trans:mat.setTransparent(blendMat)
+		mesh.materials.append(blendMat)
 
 
 	def addvertexUV(self,blenderMesh,mesh):
