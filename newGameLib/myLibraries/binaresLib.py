@@ -39,12 +39,12 @@ class BinaryUnpacker():
 
 	def saveLog(self,openLog=False):
 		if self.log:
-			print("zaczynam log")
+			print("Begin log")
 			with open("log.txt","w") as Log:
 				Log.write(self.logData+"offset:"+str(self.offset)+"\n")
 			if openLog==True:
 				os.system(blendDir+os.sep+"tools"+os.sep+"Notepad++"+os.sep+"notepad++.exe"+" "+"log.txt")
-			print("koncze log")
+			print("End log")
 
 	def WriteToFile(self,path):
 		file=open(path,'wb')
@@ -607,7 +607,7 @@ class BinaryReader():
 			if off>=0:
 				s+=data[:off]
 				self.inputFile.seek(start+off+len(var))
-				#print('znaleziono',var,'offset=',self.inputFile.tell())
+				#print('Found',var,'offset=',self.inputFile.tell())
 				break
 			else:
 				s+=data
@@ -805,11 +805,10 @@ class New:
 		g=None
 
 		if len(drive)==0 and len(tail)!=0:
-			self.path=self.sys.dir+os.sep+self.sys.base+'_files'+os.sep+self.basename
+			self.path=os.path.join(self.sys.dir, self.sys.base+'_files', self.basename.decode())
 			#print(path)
 			dirpath=os.path.dirname(self.path)
-			if os.path.exists(dirpath)==False:
-				os.makedirs(dirpath)
+			os.makedirs(dirpath, exist_ok=True)
 
 		if len(drive)!=0 and len(tail)!=0:
 			dirpath=os.path.dirname(self.basename)
@@ -865,7 +864,7 @@ class Sys1(object):
 		search.part=part
 		search.run()
 		if self.log==True:
-			print('znaleziono',len(search.list),what)
+			print('Found',len(search.list),what)
 		return search.list
 
 
@@ -992,7 +991,7 @@ class Sys(object):
 		search.part=part
 		search.run()
 		if self.log==True:
-			print('znaleziono',len(search.list),what)
+			print('Found',len(search.list),what)
 		#if len(search.list)==1;
 		#	return search.list[0]
 		if len(search.list)==0:
@@ -1047,11 +1046,11 @@ class Sys(object):
 					#print(split2)
 					#print(split1)
 					for m in range(len(split1)):
-						result1=combinations(split1,m+1)
-						for item1 in result1:
+						#result1=combinations(split1,m+1)
+						for item1 in combinations(split1,m+1):
 							for n in range(len(split2)):
-								result2=combinations(split2,n+1)
-								for item2 in result2:
+								#result2=combinations(split2,n+1)
+								for item2 in combinations(split2,n+1):
 									path=str(item1+item2).replace("('",'').replace("')",'').replace("', '",os.sep)
 									#print(path)
 									if os.path.exists(path)==True and split2[-1] in path:

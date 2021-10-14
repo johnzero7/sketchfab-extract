@@ -1,4 +1,5 @@
 import bpy
+import sys
 from mathutils import *
 from .myFunction import *
 from .commandLib import *
@@ -47,10 +48,10 @@ def setBox(box,meshList):
 
 def bindPose1(bindSkeleton,poseSkeleton,meshObject):
 		#print('BINDPOSE')
-		mesh=meshObject.getData(mesh=1)
-		poseBones=poseSkeleton.getData().bones
-		bindBones=bindSkeleton.getData().bones
-		for vert in mesh.verts:
+		mesh=meshObject.data
+		poseBones=poseSkeleton.data.bones
+		bindBones=bindSkeleton.data.bones
+		for vert in mesh.vetices:
 			index=vert.index
 			skinList=mesh.getVertexInfluences(index)
 			vco=vert.co.copy()*meshObject.matrixWorld
@@ -73,29 +74,42 @@ def bindPose1(bindSkeleton,poseSkeleton,meshObject):
 
 def bindPose(bindSkeleton,poseSkeleton,meshObject):
 		#print('BINDPOSE')
-		mesh=meshObject.getData(mesh=1)
-		poseBones=poseSkeleton.getData().bones
-		bindBones=bindSkeleton.getData().bones
-		for vert in mesh.verts:
+		mesh=meshObject.data
+		poseBones=poseSkeleton.data.bones
+		bindBones=bindSkeleton.data.bones
+		for vert in mesh.vertices:
 			index=vert.index
-			skinList=mesh.getVertexInfluences(index)
-			vco=vert.co.copy()*meshObject.matrixWorld
+
+			##create vertex group
+			#C.object.vertex_groups.new(name='ASD')
+
+			##asign groups
+			#C.object.vertex_groups[0].add([0,0],weight=1,type='REPLACE')
+
+			##asign weight(group must exists)
+			#C.object.data.vertices[0].groups[0].weight
+
+
+
+			#skinList=mesh.getVertexInfluences(index)
+			skinList=[]
+			vco=vert.co.copy() @ meshObject.matrix_world
 			vector=Vector()
 			sum=0
 			for skin in skinList:
 				bone=skin[0]
 				weight=skin[1]
 				if bone in bindBones.keys() and bone in poseBones.keys():
-					matA=bindBones[bone].matrix['ARMATURESPACE']*bindSkeleton.matrixWorld
-					matB=poseBones[bone].matrix['ARMATURESPACE']*poseSkeleton.matrixWorld
-					vector+=vco*matA.invert()*matB*weight
+					matA=bindBones[bone].matrix['ARMATURESPACE'] @ bindSkeleton.matrixWorld
+					matB=poseBones[bone].matrix['ARMATURESPACE'] @ poseSkeleton.matrixWorld
+					vector+=vco @ matA.invert() @ matB * weight
 					sum+=weight
 				else:
 					vector=vco
 					break
-			vert.co=vector
+			#vert.co=vector
 		mesh.update()
-		Blender.Window.RedrawAll()
+		#Blender.Window.RedrawAll()
 
 
 
@@ -350,9 +364,9 @@ class Mesh():
 		# blenderMesh.vertexUV = 1
 		#for m in range(len(blenderMesh.vertices)):
 		#	if self.UVFLIP==False:
-		#		blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m][0], 1-mesh.vertUVList[m][1])
+		#		blenderMesh.vetices[m].uvco = Vector(mesh.vertUVList[m][0], 1-mesh.vertUVList[m][1])
 		#	else:
-		#		blenderMesh.verts[m].uvco = Vector(mesh.vertUVList[m])
+		#		blenderMesh.vetices[m].uvco = Vector(mesh.vertUVList[m])
 
 
 	def addfaceUV(self,blenderMesh,mesh):
@@ -369,7 +383,7 @@ class Mesh():
 							uv_layer.data[loop_index].uv = Vector((mesh.vertUVList[vertex_index][0], 1-mesh.vertUVList[vertex_index][1]))
 
 
-					if len(mesh.matIDList)>0 and False:
+					if len(mesh.matIDList)>0 and False: ###
 						if ID<len(mesh.matIDList):
 							face.mat=mesh.matIDList[ID]
 			if len(mesh.matIDList)>0:
@@ -413,26 +427,31 @@ class Mesh():
 			weights=mesh.skinWeightList[vertID]
 			for skinID,ID in enumerate(mesh.skinIDList[vertID]):
 				if ID==1:
-					if len(weights)<len(indices):count=len(weights)
-					else:count=len(indices)
+					if len(weights)<len(indices):
+						count=len(weights)
+					else:
+						count=len(indices)
 					for n in range(count):
 						w  = weights[n]
-						if type(w)==int:w=w/255.0
+						if type(w) is int:
+							w=w/255.0
 						if w!=0.0:
 							grID = indices[n]
 							if len(self.boneNameList)==0:
-								if len(self.skinList[skinID].boneMap)>0:grName = str(self.skinList[skinID].boneMap[grID])
-								else:grName = str(grID)
+								if len(self.skinList[skinID].boneMap)>0:
+									grName = str(self.skinList[skinID].boneMap[grID])
+								else:
+									grName = str(grID)
 							else:
 								if len(self.skinList[skinID].boneMap)>0:
 									grNameID = self.skinList[skinID].boneMap[grID]
 									grName=self.boneNameList[grNameID]
 								else:
 									grName=self.boneNameList[grID]
-							if grName not in blendMesh.getVertGroupNames():
-								blendMesh.addVertGroup(grName)
-							add = Blender.Mesh.AssignModes.ADD
-							blendMesh.assignVertsToGroup(grName,[vertID],w,add)
+							vertGroup = self.object.vertex_groups.get(grName.decode())
+							if (vertGroup is None):
+								vertGroup = self.object.vertex_groups.new(name=grName.decode())
+							vertGroup.add([vertID], w, 'REPLACE')
 		blendMesh.update()
 
 
@@ -563,7 +582,7 @@ class Mesh():
 	def buildMesh(self,mesh,mat,meshID):
 		if len(mesh.vertPosList)>0:
 			blendMesh = bpy.data.meshes.new(mesh.name)
-			blendMesh.verts.extend(mesh.vertPosList)
+			blendMesh.vetices.extend(mesh.vertPosList)
 			triangleFlag=False
 			for triangle in mesh.triangleList:
 				if len(triangle)>4 or len(triangle)<3:
@@ -579,7 +598,7 @@ class Mesh():
 				if len(mesh.faceUVList)>0:
 					self.addfaceUV(blendMesh,mesh)
 			if len(mesh.vertNormList)>0:
-				for i,vert in enumerate(blendMesh.verts):
+				for i,vert in enumerate(blendMesh.vetices):
 					vert.no=Vector(self.vertNormList[i])
 
 			scene = bpy.context.scene
@@ -603,13 +622,13 @@ class Mesh():
 		#print('---addMesh...')
 		#print('----self.vertPosList', self.vertPosList)
 		#print('----self.triangleList', self.triangleList)
-		#self.mesh.verts.extend(self.vertPosList)
+		#self.mesh.vetices.extend(self.vertPosList)
 		if len(self.vertNormList)>0:
-			for i,vert in enumerate(self.mesh.verts):
+			for i,vert in enumerate(self.mesh.vetices):
 				vert.no=Vector(self.vertNormList[i])
 		self.mesh.from_pydata(self.vertPosList, [], self.triangleList)
-		scene = bpy.context.scene
 		self.object = bpy.data.objects.new(self.name, self.mesh)
+		scene = bpy.context.scene
 		scene.collection.objects.link(self.object)
 
 
@@ -618,7 +637,7 @@ class Mesh():
 			scene = bpy.context.scene
 			for object in scene.objects:
 				if object.name==skeletonName:
-					skeletonMatrix=self.object.getMatrix()*object.mat
+					skeletonMatrix=self.object.getMatrix() @ object.mat
 					self.object.setMatrix(skeletonMatrix)
 					object.makeParentDeform([self.object],1,0)
 
@@ -629,6 +648,7 @@ class Mesh():
 		if not self.name:
 			self.name=str(self.sceneIDList.meshID).zfill(3)+'-0-'+str(self.sceneIDList.objectID)
 		self.addFaces()
+
 		if self.SPLIT==False:
 			self.addMesh()
 			if self.mod==True:
@@ -654,17 +674,21 @@ class Mesh():
 				scene = bpy.context.scene
 				object = scene.objects.get(self.BINDSKELETON)
 				if object:
-					skeletonMatrix=self.object.matrix_world @ object.matrix_world
-					#self.object.setMatrix(skeletonMatrix)
-					#object.makeParentDeform([self.object],1,0)
-			if len(self.skinIndiceList)>0 and len(self.skinWeightList)>0 and False:
+					skeletonMatrix=object.matrix_world @ self.object.matrix_world
+					self.object.matrix_world = skeletonMatrix
+					self.object.parent = object
+					modif = self.object.modifiers.new(name='Armature', type='ARMATURE')
+					modif.object = object
+
+			if len(self.skinIndiceList)>0 and len(self.skinWeightList)>0:
 				if len(self.skinIndiceList)==len(self.skinWeightList)>0:
 					try:
 						self.addSkinIDList()
 						self.addSkinWithIndiceList(self.mesh,self)
 					except:
 						print('WARNING:self.addSkinWithIndiceList:',self.mesh.name)
-			if len(self.skinGroupList)>0 and len(self.skinWeightList)>0 and False:
+						print(sys.exc_info())
+			if len(self.skinGroupList)>0 and len(self.skinWeightList)>0:
 				if len(self.skinGroupList)==len(self.skinWeightList)>0:
 					#print('addSkinWithGroupList')
 					try:
@@ -673,25 +697,23 @@ class Mesh():
 					except:
 						print('WARNING:self.addSkinWithGroupList:',self.mesh.name)
 
-			if len(self.vertColList)==len(self.vertPosList) and False:
+			if len(self.vertColList)==len(self.vertPosList):
 				if len(self.triangleList)>0:
-					self.mesh.vertexColors = 1
-					for face in self.mesh.faces:
-						for i,v in enumerate(face):
-							col=face.col[i]
-							col.r=self.vertColList[v.index][0]
-							col.g=self.vertColList[v.index][1]
-							col.b=self.vertColList[v.index][2]
+					vcolors = self.mesh.vertex_colors.new()
+					for poly in self.mesh.polygons:
+						for loop_index in poly.loop_indices:
+							vertex_index = self.mesh.loops[loop_index].vertex_index
+							vcolors.data[loop_index].color = list(map(lambda x : x /255, self.vertColList[vertex_index]))
 							#write(log,self.vertColList[v.index],0)
-					print('MESH UZYWA VERTEX COLOR')
+					print('MESH USES VERTEX COLOR')
 				else:
-					print('MESH NIE UZYWA VERTEX COLOR:',self.mesh.name,len(self.triangleList))
+					print('MESH DOES NOT USE VERTEX COLOR:',self.mesh.name,len(self.triangleList))
 			#Blender.Window.RedrawAll()
 
 
 
 		if self.SPLIT==True:
-			#print('Dzielenie siatek:',len(self.matList))
+			#print('Split Meshes:',len(self.matList))
 			#print('self.name:',self.name)
 			meshList=[]
 			for matID in range(len(self.matList)):
@@ -702,8 +724,9 @@ class Mesh():
 				#	mesh.name=self.matList[matID].name
 				#else:
 				#	mesh.name=self.name+'-'+str(matID)
-				mesh.name=self.name.split('-')[0]+'-'+str(matID).zfill(3)+'-'+str(self.sceneIDList.objectID).zfill(3)
-				#print(' '*4,'siatka:',matID,mesh.name)
+				if not mesh.name:
+					mesh.name=self.name.split('-')[0]+'-'+str(matID).zfill(3)+'-'+str(self.sceneIDList.objectID).zfill(3)
+				#print(' '*4,'material:',matID,mesh.name)
 				meshList.append(mesh)
 
 			for faceID in range(len(self.matIDList)):
@@ -812,7 +835,8 @@ class Mesh():
 			f3 = indicesList[id]
 			#print(f3)
 			if (f3==0xFFFF):
-				if id==len(indicesList)-1:break
+				if id==len(indicesList)-1:
+					break
 				id+=1
 				f1 = indicesList[id]
 				id+=1
@@ -832,7 +856,8 @@ class Mesh():
 						f1,f2,f3
 				f1 = f2
 				f2 = f3
-			if id==len(indicesList)-1:break
+			if id==len(indicesList)-1:
+				break
 
 
 	def indicesToQuads2(self,indicesList):
@@ -859,7 +884,8 @@ class Mesh():
 			f3 = indicesList[id]
 			#print(f3)
 			if (f3==0xFFFF):
-				if id==len(indicesList)-1:break
+				if id==len(indicesList)-1:
+					break
 				id+=1
 				f1 = indicesList[id]
 				id+=1
@@ -879,7 +905,8 @@ class Mesh():
 						f1,f2,f3
 				f1 = f2
 				f2 = f3
-			if id==len(indicesList)-1:break
+			if id==len(indicesList)-1:
+				break
 
 
 class Skin:

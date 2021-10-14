@@ -82,15 +82,15 @@ class Skeleton:
 				if len(bone.name)>25:
 					self.nameTestFlag=True
 					self.nameProblemList.append(bone)
-					#print('Problem:name too long for bone',bone.name)
+					#print('Problem: name too long for bone',bone.name)
 
 
 	def boneChildren(self,parentBlenderBone,parentBone):
 		for child in parentBlenderBone.children:
 			for bone in self.boneList:
-				if bone.name==child.name:
-					blenderBone=self.armature.bones[bone.name]
-					bone.matrix*=parentBone.matrix
+				if bone.name == child.name:
+					blenderBone = self.armature.bones[bone.name]
+					###bone.matrix @= parentBone.matrix
 					self.boneChildren(blenderBone,bone)
 
 	def createChildList(self):
@@ -111,8 +111,8 @@ class Skeleton:
 		if self.BONESPACE==True:
 			self.ARMATURESPACE=False
 			self.INVERTSPACE=False
-		objectID=SceneIDList().szkieletID
-		if not self.name:self.name='szkielet-'+str(objectID)
+		objectID=SceneIDList().armatureID
+		if not self.name:self.name='armature-'+str(objectID)
 		if self.WARNING==True:
 			print('INPUT:')
 			print('class<Skeleton>.name:',self.name)
@@ -179,13 +179,13 @@ class Skeleton:
 			print
 			print('=======PROBLEMY===========')
 			if self.parentTestFlag is True:
-				print('WARNING:znaleziono kosci z wiecej niz jednym rodzicem')
+				print('WARNING: Bones found with more than one parent')
 				for bone in self.parentProblemList:
 					print(bone.name,len(bone.parentList),'rodzic')
 					for parent in bone.parentList:
 						print(' '*4,parent.name)
 			if self.nameTestFlag is True:
-				print('WARNING:znaleziono kosci o za dlugiej nazwie')
+				print('WARNING: Found bones with too long names')
 				for bone in self.nameProblemList:
 					print(bone.name,len(bone.name),'liter')
 			print
@@ -259,44 +259,40 @@ class Skeleton:
 			bone = self.armature.edit_bones[name.decode()]
 			if matrix:
 				if self.ARMATURESPACE==True:
-					bone.matrix=matrix
+					bone.matrix = matrix.transposed()
 					if self.NICE==True:
-    						bone.lenght = self.param
+    						bone.length = self.param
 				elif self.BONESPACE==True:
 					rotMatrix=matrix.rotationPart()
 					posMatrix=matrix.translationPart()
 					scalePart=matrix.scalePart()
 					if bone.parent:
-						bone.head =   posMatrix @ bone.parent.matrix + bone.parent.head
+						bone.head = posMatrix @ bone.parent.matrix + bone.parent.head
 						if self.boneList[m].transform not in ["noRotationOrReflection","onlyTranslation"]:
 							tempM = rotMatrix @ bone.parent.matrix
-							bone.matrix = tempM
+							###bone.matrix = tempM
 						else:
 							tempM = rotMatrix # * bone.parent.matrix
-							bone.matrix = tempM
+							###bone.matrix = tempM
 					else:
 						bone.head = posMatrix
-						bone.matrix = rotMatrix
+						###bone.matrix = rotMatrix
 					if self.NICE==True:
-						bvec = bone.tail- bone.head
-						bvec.normalize()
-						bone.tail = bone.head + self.param * bvec
+						bone.length = self.param
 				elif self.INVERTSPACE==True:
 					rotMatrix=matrix.rotationPart()
 					posMatrix=matrix.translationPart()
 					posMatrix=posMatrix @ rotMatrix.invert()
 					posMatrix.negate()
 					if bone.parent:
-						bone.head =   posMatrix
+						bone.head = posMatrix
 						tempM = bone.parent.matrix @ rotMatrix
-						bone.matrix = tempM
+						###bone.matrix = tempM
 					else:
 						bone.head = posMatrix
-						bone.matrix = rotMatrix
+						###bone.matrix = rotMatrix
 					if self.NICE==True:
-						bvec = bone.tail- bone.head
-						bvec.normalize()
-						bone.tail = bone.head + self.param * bvec
+						bone.length = self.param
 
 				else:
 					if self.WARNING==True:
@@ -307,32 +303,31 @@ class Skeleton:
 						rotMatrix=roundMatrix(rotMatrix,4)
 					posMatrix=roundMatrix(posMatrix,4)
 					if rotMatrix:
-						bone.matrix=rotMatrix*posMatrix
+						pass
+						###bone.matrix=rotMatrix @ posMatrix
 					else:
-						bone.matrix=posMatrix
+						pass
+						###bone.matrix=posMatrix
 
 					if self.NICE==True:
-						bvec = bone.tail- bone.head
-						bvec.normalize()
-						bone.tail = bone.head + self.param * bvec
+						bone.length = self.param
+
 				elif self.BONESPACE==True:
 					rotMatrix=roundMatrix(rotMatrix,4).rotationPart()
 					posMatrix=roundMatrix(posMatrix,4).translationPart()
 					if bone.parent:
-						bone.head =   posMatrix * bone.parent.matrix+bone.parent.head
+						bone.head = posMatrix @ bone.parent.matrix + bone.parent.head
 						if self.boneList[m].transform not in ["noRotationOrReflection","onlyTranslation"]:
-							tempM = rotMatrix * bone.parent.matrix
-							bone.matrix = tempM
+							tempM = rotMatrix @ bone.parent.matrix
+							###bone.matrix = tempM
 						else:
 							tempM = rotMatrix# * bone.parent.matrix
-							bone.matrix = tempM
+							###bone.matrix = tempM
 					else:
 						bone.head = posMatrix
-						bone.matrix = rotMatrix
+						###bone.matrix = rotMatrix
 					if self.NICE==True:
-						bvec = bone.tail- bone.head
-						bvec.normalize()
-						bone.tail = bone.head + self.param * bvec
+						bone.length = self.param
 				else:
 					if self.WARNING==True:
 						print('ARMATUREPACE or BONESPACE ?')
@@ -348,15 +343,15 @@ class Skeleton:
 	def check(self):
 		#scn = Blender.Scene.GetCurrent()
 		scene = bpy.context.scene
-		for object in scene.objects:
-			if object.type=='Armature':
-				if object.name == self.name:
+		for object in (obj for obj in scene.objects if (obj.name == self.name and obj.type=='Armature')):
+			#if object.type=='Armature':
+				#if object.name == self.name:
 					scene.objects.unlink(object)
-		for object in bpy.data.objects:
-			if object.type=='Armature':
-				if object.name == self.name:
+		for object in (obj for obj in scene.objects if (obj.name == self.name and obj.type=='Armature')):
+			#if object.type=='Armature':
+				#if object.name == self.name:
 					self.object = Blender.Object.Get(self.name)
-					self.armature = self.object.getData()
+					self.armature = self.object.data
 					if self.DEL==True:
 						self.armature.makeEditable()
 						for bone in self.armature.bones.values():
@@ -369,9 +364,10 @@ class Skeleton:
 			self.object = bpy.data.objects.new(name=self.name, object_data=self.armature)
 		#scn.link(self.object)
 		scene.collection.objects.link(self.object)
-		self.armature.display_type = 'STICK'
+		self.armature.display_type = 'OCTAHEDRAL'
 		self.object.show_in_front = True
-		self.matrix=self.object.matrix_world
+		self.object.display_type = 'WIRE'
+		self.matrix = self.object.matrix_world
 
 
 	def check1(self):
@@ -384,6 +380,7 @@ class Skeleton:
 		scene.collection.objects.link(self.object)
 		self.armature.display_type = 'STICK'
 		self.object.show_in_front = True
+		self.object.display_type = 'WIRE'
 
 
 

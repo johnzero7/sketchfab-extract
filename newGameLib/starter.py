@@ -379,7 +379,7 @@ class BinaryReader():
 			if(off>=0):
 				s+=data[:off]
 				self.inputFile.seek(start+off+len(var))
-				#print('znaleziono', var, 'offset=', self.inputFile.tell())
+				#print('Found', var, 'offset=', self.inputFile.tell())
 				break
 			else:
 				s+=data
@@ -432,10 +432,10 @@ class BinaryReader():
 	def findchar(self, var):
 		offset=self.inputFile.find(var)
 		if(self.debug==True):
-			print(var, 'znaleziono', offset)
+			print(var, 'Found', offset)
 		if(self.log==True):
 			if(self.logfile is not None and self.logskip is not True):
-				self.logfile.write(var+' znaleziono '+str(offset)+'\n')
+				self.logfile.write(var+' Found '+str(offset)+'\n')
 		return offset
 
 
@@ -791,7 +791,7 @@ def getMatName(ys, parent):
 def getSplitName(name, what, which):
 	a=None
 	if(what in name):
-		a=''
+		a=b''
 		splits=name.split(what)
 		if(which<0):
 			num=len(splits)+which-1
@@ -984,10 +984,10 @@ def getAnimation(ys, A, n):
 			if(Vec3LerpChannel):
 				KeyFrames=ys.get(a, b'"KeyFrames"')
 				if(KeyFrames):
-					values=ys.values(KeyFrames[0].header, b':')
-					Name=ys.getValue(values, '"Name"')
+					values=ys.values(KeyFrames[0].header, ':')
+					Name=ys.getValue(values, b'"Name"')
 					TargetName=ys.getValue(values, b'"TargetName"', '""')
-					name=getSplitName(TargetName, '_', -1)
+					name=getSplitName(TargetName, b'_', -1)
 					if(Name==b'"translate"'):
 						bone=None
 						if(TargetName in boneIndeksList):
@@ -1020,7 +1020,7 @@ def getAnimation(ys, A, n):
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split('.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1037,8 +1037,8 @@ def getAnimation(ys, A, n):
 										#write(log, value, n+8)
 										if(bone):
 											new.f(value)
-											boneMatrix=skeleton.object.getData().bones[bone.name].matrix['ARMATURESPACE']
-											matrix=VectorMatrix(value)#*boneMatrix
+											#boneMatrix=skeleton.object.data.bones[bone.name].matrix['ARMATURESPACE']
+											matrix=VectorMatrix(value) #*boneMatrix
 											bone.posKeyList.append(matrix)
 									file.close()
 							else:
@@ -1046,26 +1046,25 @@ def getAnimation(ys, A, n):
 						else:
 							print('no key')
 
-						Time=ys.get(a, '"Time"')
+						Time=ys.get(a, b'"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], '"Float32Array"')
+							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], b'"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, '"File"')
-								Size=ys.getValue(values, '"Size"')
-								Offset=ys.getValue(values, '"Offset"')
+								File=ys.getValue(values, b'"File"')
+								Size=ys.getValue(values, b'"Size"')
+								Offset=ys.getValue(values, b'"Offset"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1089,9 +1088,6 @@ def getAnimation(ys, A, n):
 						else:
 							print('no time')
 
-
-
-
 					if(Name=='"scale"'):
 						bone=None
 						if(TargetName in boneIndeksList):
@@ -1106,25 +1102,25 @@ def getAnimation(ys, A, n):
 							print('skiped scale bone:', TargetName)
 
 
-						Key=ys.get(a, '"Key"')
+						Key=ys.get(a, b'"Key"')
 						if(Key):
 							values=ys.values(Key[0].data, ':')
-							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
-							Float32Array=ys.get(Key[0], '"Float32Array"')
+							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
+							Float32Array=ys.get(Key[0], b'"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, '"File"')
-								Size=ys.getValue(values, '"Size"')
-								Offset=ys.getValue(values, '"Offset"')
+								File=ys.getValue(values, b'"File"')
+								Size=ys.getValue(values, b'"Size"')
+								Offset=ys.getValue(values, b'"Offset"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1141,8 +1137,8 @@ def getAnimation(ys, A, n):
 										#write(log, value, n+8)
 										if(bone):
 											new.f(value)
-											boneMatrix=skeleton.object.getData().bones[bone.name].matrix['ARMATURESPACE']
-											matrix=VectorMatrix(value)#*boneMatrix
+											#boneMatrix=skeleton.object.data.bones[bone.name].matrix['ARMATURESPACE']
+											matrix=VectorMatrix(value) #*boneMatrix
 											bone.sizeKeyList.append(matrix)
 									file.close()
 							else:
@@ -1150,26 +1146,25 @@ def getAnimation(ys, A, n):
 						else:
 							print('no key')
 
-						Time=ys.get(a, '"Time"')
+						Time=ys.get(a, b'"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], '"Float32Array"')
+							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], b'"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, '"File"')
-								Size=ys.getValue(values, '"Size"')
-								Offset=ys.getValue(values, '"Offset"')
+								File=ys.getValue(values, b'"File"')
+								Size=ys.getValue(values, b'"Size"')
+								Offset=ys.getValue(values, b'"Offset"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1214,7 +1209,7 @@ def getAnimation(ys, A, n):
 					Name=ys.getValue(values, b'"Name"')
 					TargetName=ys.getValue(values, b'"TargetName"', '""')
 					#write(log, ['Vec3LerpChannelCompressedPacked:', Name, 'TargetName:', TargetName], n+4)
-					name=getSplitName(TargetName, '_', -1)
+					name=getSplitName(TargetName, b'_', -1)
 					if(Name==b'"translate"'):
 						bone=None
 						if(TargetName in boneIndeksList):
@@ -1241,17 +1236,17 @@ def getAnimation(ys, A, n):
 								File=ys.getValue(values, b'"File"')
 								Size=int(ys.getValue(values, b'"Size"'))
 								Offset=int(ys.getValue(values, b'"Offset"'))
-								Encoding=ys.getValue(values, b'"Encoding"')
+								#Encoding=ys.getValue(values, b'"Encoding"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding, 'ItemSize:', ItemSize], n+4)
 
 
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1274,39 +1269,36 @@ def getAnimation(ys, A, n):
 										#write(log, value, n+8)
 										if(bone):
 											new.f(value)
-											if(bone.name in skeleton.object.getData().bones.keys()):
-												boneMatrix=skeleton.object.getData().bones[bone.name].matrix['ARMATURESPACE']
+											if(bone.name in skeleton.object.data.bones.keys()):
+												#boneMatrix=skeleton.object.data.bones[bone.name].matrix['ARMATURESPACE']
 												#boneMatrix*=VectorMatrix(value)
-												matrix=VectorMatrix(value)#*boneMatrix
+												matrix=VectorMatrix(value) #*boneMatrix
 												bone.posKeyList.append(matrix)
-
 									file.close()
 							else:
 								print('unknow array type')
 						else:
 							print('no key')
 
-						Time=ys.get(a, '"Time"')
+						Time=ys.get(a, b'"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], '"Float32Array"')
+							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], b'"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, '"File"')
-								Size=ys.getValue(values, '"Size"', 'i')
-								Offset=ys.getValue(values, '"Offset"', 'i')
+								File=ys.getValue(values, b'"File"')
+								Size=ys.getValue(values, b'"Size"', 'i')
+								Offset=ys.getValue(values, b'"Offset"', 'i')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-
-
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1334,17 +1326,15 @@ def getAnimation(ys, A, n):
 						else:
 							print('no time')
 
-
-
-			QuatSlerpChannel=ys.get(a, '"osgAnimation.QuatSlerpChannel"')
+			QuatSlerpChannel=ys.get(a, b'"osgAnimation.QuatSlerpChannel"')
 			if(QuatSlerpChannel):
-				KeyFrames=ys.get(a, '"KeyFrames"')
+				KeyFrames=ys.get(a, b'"KeyFrames"')
 				if(KeyFrames):
 					values=ys.values(KeyFrames[0].header, ':')
-					Name=ys.getValue(values, '"Name"')
-					TargetName=ys.getValue(values, '"TargetName"', '""')
+					Name=ys.getValue(values, b'"Name"')
+					TargetName=ys.getValue(values, b'"TargetName"', '""')
 					#write(log, ['QuatSlerpChannel:', Name, 'TargetName:', TargetName], n+4)
-					name=getSplitName(TargetName, '_', -1)
+					name=getSplitName(TargetName, b'_', -1)
 					bone=None
 					if(TargetName in boneIndeksList):
 						name=boneIndeksList[TargetName]
@@ -1357,28 +1347,25 @@ def getAnimation(ys, A, n):
 					else:
 						print('skiped quaternion bone:', TargetName)
 
-
-
-					Key=ys.get(a, '"Key"')
+					Key=ys.get(a, b'"Key"')
 					if(Key):
 						values=ys.values(Key[0].data, ':')
-						ItemSize=ys.getValue(values, '"ItemSize"')
-						Float32Array=ys.get(Key[0], '"Float32Array"')
+						ItemSize=ys.getValue(values, b'"ItemSize"')
+						Float32Array=ys.get(Key[0], b'"Float32Array"')
 						if(Float32Array):
 							values=ys.values(Float32Array[0].data, ':')
-							File=ys.getValue(values, '"File"')
-							Size=ys.getValue(values, '"Size"')
-							Offset=ys.getValue(values, '"Offset"')
+							File=ys.getValue(values, b'"File"')
+							Size=ys.getValue(values, b'"Size"')
+							Offset=ys.getValue(values, b'"Offset"')
 							#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-
-							path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 							if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 								cmd=Cmd()
 								cmd.input=path
 								cmd.ZIP=True
 								cmd.run()
-							path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 							if(os.path.exists(path)==False):
 								path+='.gz.txt'
 
@@ -1397,31 +1384,31 @@ def getAnimation(ys, A, n):
 									value=Quaternion(value)
 									if(bone):
 										#new.f(value)
-										boneMatrix=skeleton.object.getData().bones[bone.name].matrix['ARMATURESPACE']
+										boneMatrix=skeleton.object.data.bones[bone.name].matrix['ARMATURESPACE']
 										#bone.rotKeyList.append(boneMatrix*QuatMatrix(value).to_4x4())
 										matrix=QuatMatrix(value).to_4x4() #*boneMatrix
 										bone.rotKeyList.append(matrix)
 								file.close()
 
-					Time=ys.get(a, '"Time"')
+					Time=ys.get(a, b'"Time"')
 					if(Time):
 						values=ys.values(Time[0].data, ':')
-						ItemSize=ys.getValue(values, '"ItemSize"', 'i')
-						Float32Array=ys.get(Time[0], '"Float32Array"')
+						ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
+						Float32Array=ys.get(Time[0], b'"Float32Array"')
 						if(Float32Array):
 							values=ys.values(Float32Array[0].data, ':')
-							File=ys.getValue(values, '"File"')
-							Size=ys.getValue(values, '"Size"')
-							Offset=ys.getValue(values, '"Offset"')
+							File=ys.getValue(values, b'"File"')
+							Size=ys.getValue(values, b'"Size"')
+							Offset=ys.getValue(values, b'"Offset"')
 							#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-							path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 							if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 								cmd=Cmd()
 								cmd.input=path
 								cmd.ZIP=True
 								cmd.run()
-							path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 							if(os.path.exists(path)==False):
 								path+='.gz.txt'
 
@@ -1440,31 +1427,30 @@ def getAnimation(ys, A, n):
 										bone.rotFrameList.append(int(value*33))
 								file.close()
 
-
-			QuatSlerpChannelCompressedPacked=ys.get(a, '"osgAnimation.QuatSlerpChannelCompressedPacked"')
+			QuatSlerpChannelCompressedPacked=ys.get(a, b'"osgAnimation.QuatSlerpChannelCompressedPacked"')
 			if(QuatSlerpChannelCompressedPacked):
 				TargetName=None
 				try:
 
 					atributes={}
-					UserDataContainer=ys.get(QuatSlerpChannelCompressedPacked[0], '"UserDataContainer"')
+					UserDataContainer=ys.get(QuatSlerpChannelCompressedPacked[0], b'"UserDataContainer"')
 					if(UserDataContainer):
-						Values=ys.get(UserDataContainer[0], '"Values"')
+						Values=ys.get(UserDataContainer[0], b'"Values"')
 						if(Values):
 							for child in Values[0].children:
 								values=ys.values(child.data, ':')
-								Name=ys.getValue(values, '"Name"')
-								Value=ys.getValue(values, '"Value"', '"f"')
+								Name=ys.getValue(values, b'"Name"')
+								Value=ys.getValue(values, b'"Value"', '"f"')
 								#write(log, [Name, Value], n+4)
 								atributes[Name]=Value
 
-					KeyFrames=ys.get(a, '"KeyFrames"')
+					KeyFrames=ys.get(a, b'"KeyFrames"')
 					if(KeyFrames):
 						values=ys.values(KeyFrames[0].header, ':')
-						Name=ys.getValue(values, '"Name"')
-						TargetName=ys.getValue(values, '"TargetName"', '""')
+						Name=ys.getValue(values, b'"Name"')
+						TargetName=ys.getValue(values, b'"TargetName"', '""')
 						#write(log, ['QuatSlerpChannelCompressedPacked:', Name, 'TargetName:', TargetName], n+4)
-						name=getSplitName(TargetName, '_', -1)
+						name=getSplitName(TargetName, b'_', -1)
 						#print(TargetName)
 						bone=None
 						#print(TargetName)
@@ -1491,19 +1477,19 @@ def getAnimation(ys, A, n):
 								File=ys.getValue(values, b'"File"')
 								Size=int(ys.getValue(values, b'"Size"'))
 								Offset=int(ys.getValue(values, b'"Offset"'))
-								Encoding=ys.getValue(values, b'"Encoding"')
+								#Encoding=ys.getValue(values, b'"Encoding"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding, 'ItemSize:', ItemSize], n+4)
 
 
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
-									path+='.gz.txt'
+									path+=b'.gz.txt'
 
 								if(os.path.exists(path)):
 									file=open(path, 'rb')
@@ -1533,31 +1519,31 @@ def getAnimation(ys, A, n):
 											#write(log, value, n+8)
 											if(bone):
 												#new.f(value)
-												boneMatrix=skeleton.object.getData().bones[bone.name].matrix['ARMATURESPACE']
+												#boneMatrix=skeleton.object.data.bones[bone.name].matrix['ARMATURESPACE']
 												##bone.rotKeyList.append((boneMatrix.rotationPart()*QuatMatrix(value)).to_4x4())
 												matrix=QuatMatrix(value).to_4x4() #*boneMatrix
 												bone.rotKeyList.append(matrix)
 									file.close()
 
-						Time=ys.get(a, '"Time"')
+						Time=ys.get(a, b'"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], '"Float32Array"')
+							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], b'"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, '"File"')
-								Size=ys.getValue(values, '"Size"', 'i')
-								Offset=ys.getValue(values, '"Offset"', 'i')
+								File=ys.getValue(values, b'"File"')
+								Size=ys.getValue(values, b'"Size"', 'i')
+								Offset=ys.getValue(values, b'"Offset"', 'i')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
+								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1582,7 +1568,7 @@ def getAnimation(ys, A, n):
 												bone.rotFrameList.append(int(value*33))
 									file.close()
 				except:
-					print('niepowodzenie:QuatSlerpChannelCompressedPacked:', TargetName)
+					print('Failure: QuatSlerpChannelCompressedPacked:', TargetName)
 
 			#if(bone):
 			#	print(name, bone.name)
@@ -1598,14 +1584,14 @@ def decodeVarint(g, offset, size, type:str):
 	s=0
 	while(a!=size):
 		shift = 0
-		result = 0
+		byteop = 0
 		while True:
 			byte = g.B(1)[0]
-			result |= (byte & 127) << shift
+			byteop |= (byte & 127) << shift
 			shift += 7
 			if(not (byte & 0x80)):
 				break
-		n[a]=result
+		n[a]=byteop
 		a+=1
 	if(type[0]!='U'):
 		l=0
@@ -1830,6 +1816,7 @@ class Yson:
 					if(len(alist)==1):
 						val_list[alist[0]]='None'
 
+					#if(a.count(':')>1):
 		if(type_flg=='f'):
 			val_list=list(map(float, A))
 		if(type_flg=='i'):
@@ -2501,6 +2488,10 @@ def osgAnimationRigGeometry(ys, parentNewNode):
 							mesh.indiceArray=PrimitiveSetList(ys, child)
 						if(b'"UserDataContainer"' in child.node.header):
 							mesh.atributes=UserDataContainer(ys, child)
+						if(b'"Name"' in child.node.header):
+							values=ys.values(child.node.header, ':')
+							Name=ys.getValue(values, b'"Name"', '""')
+							mesh.name = Name.decode()
 
 
 		if(b'"VertexAttributeList"' in child.node.header):
@@ -2592,6 +2583,7 @@ def osgAnimationMorphGeometry(ys, parentNewNode):
 							values=ys.values(child.node.header, ':')
 							UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
 							Name=ys.getValue(values, b'"Name"', '""')
+							mesh.name = Name
 							#write(log, [UniqueID, Name], 24)
 		if(b'"VertexAttributeList"' in child.node.header):
 			for child in child.children:
@@ -2824,7 +2816,7 @@ def osgNode(ys, parentNewNode, parentBone):
 
 def osgMatrixTransform(ys, parentNewNode, parentBone):
 	bone=Bone()
-	bone.Name=None
+	bone.name=None ###bone.Name=None
 	bone.UpdateName=None
 	bone.matrix=Matrix() #.invert()
 	if(parentBone):
@@ -2835,25 +2827,25 @@ def osgMatrixTransform(ys, parentNewNode, parentBone):
 			values=ys.values(child.node.data, 'f')
 			bone.matrix=Matrix4x4(values)
 			if(parentBone):
-				bone.matrix*=parentBone.matrix
+				bone.matrix @= parentBone.matrix
 		if(b'"UniqueID"' in child.node.header):
 			values=ys.values(child.node.header, ':')
 			UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
 			bone.name=b'UniqueID_'+str(UniqueID).encode()
 		if(b'"Name"' in child.node.header):
 			values=ys.values(child.node.header, ':')
-			Name=ys.getValue(values, b'"Name"', '""')
-			#bindBone.Name=Name
-			bone.Name=Name
+			name=ys.getValue(values, b'"Name"', '""')
+			#bindBone.Name=Name ###bindBone.name=name
+			bone.name=name ###bone.Name=Name
 		if(b'"UpdateCallbacks"' in child.node.header):
 			for child in child.children:
 				if(b'"osgAnimation.UpdateMatrixTransform"' in child.node.header):
 					for child in child.children:
 						if(b'"Name"' in child.node.header):
 							values=ys.values(child.node.header, ':')
-							Name=ys.getValue(values, b'"Name"', '""')
+							name=ys.getValue(values, b'"Name"', '""')
 							#bindBone.UpdateName=Name
-							bone.UpdateName=Name
+							bone.UpdateName=name ###bone.UpdateName=Name
 	return bone
 
 
@@ -2863,8 +2855,8 @@ def osgAnimationBone(ys, parentNewNode, parentBone):
 	bone.matrix=Matrix() #.invert()
 	bindBone=Bone()
 	bindBone.matrix=Matrix() #.invert()
-	bindBone.Name=None
-	bone.Name=None
+	bindBone.name=None ###bindBone.Name=None
+	bone.name=None ###bone.Name=None
 	bone.UpdateName=None
 	bindBone.UpdateName=None
 	for child in parentNewNode.children:
@@ -2876,13 +2868,14 @@ def osgAnimationBone(ys, parentNewNode, parentBone):
 		if(b'"UniqueID"' in child.node.header):
 			values=ys.values(child.node.header, ':')
 			UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
-			bindBone.name=b'UniqueID_'+str(UniqueID).encode()
-			bone.name=bindBone.name
+			name = b'UniqueID_'+str(UniqueID).encode()
+			bindBone.name = name
+			bone.name = name
 		if(b'"Name"' in child.node.header):
-			values=ys.values(child.node.header, ':')
-			Name=ys.getValue(values, b'"Name"', '""')
-			bindBone.Name=Name
-			bone.Name=Name
+			values = ys.values(child.node.header, ':')
+			name = ys.getValue(values, b'"Name"', '""')
+			bindBone.name = name ###bindBone.Name = name
+			bone.name = name ###bone.Name = name
 			#boneIndeksList[Name]=bone.name
 		if(b'"Matrix"' in child.node.header):
 			values=ys.values(child.node.data, 'f')
@@ -2890,7 +2883,7 @@ def osgAnimationBone(ys, parentNewNode, parentBone):
 			if(parentBone):
 				if(b'MatrixTransform' not in parentBone.name):
 					bone.parentName=parentBone.name
-				bone.matrix*=parentBone.matrix
+				bone.matrix @= parentBone.matrix
 		if(b'"UpdateCallbacks"' in child.node.header):
 			for child in child.children:
 				if(b'"osgAnimation.UpdateBone"' in child.node.header):
@@ -2952,26 +2945,26 @@ def osgParser(filename):
 
 	skeleton.draw()
 		#for bone in bindskeleton.boneList:
-		#	bone.matrix*=bindskeleton.parentBone.matrix
+		#	bone.matrix@=bindskeleton.parentBone.matrix
 	if(len(bindskeleton.boneList)>0):
 		bindskeleton.draw()
 	if(bindskeleton.parentBone and bindskeleton.object):
-		bindskeleton.object.setMatrix(bindskeleton.parentBone.matrix)
+		bindskeleton.object.matrix_basis = bindskeleton.parentBone.matrix
 	#boneNameList=[]
 
 	for bone in skeleton.boneList:
 		if(bone.UpdateName):
-			#Name=getSplitName(bone.Name, '_', -1)
+			#Name=getSplitName(bone.Name, b'_', -1)
 			boneIndeksList[bone.UpdateName]=bone.name
 			#print(Name, bone.name)
 
 	n=0
-	result=1
+	choise_animation=1
 	Animations=ys.get(ys.root, b'"osgAnimation.Animation"')
 	if(Animations):
-		#result=Blender.Draw.PupMenu("export animations as *.action?%t|Yes|No")
-		print("export animations as *.action?%t|Yes|No", result)
-		if(result==1):
+		#choise_animation=Blender.Draw.PupMenu("export animations as *.action?%t|Yes|No")
+		print("export animations as *.action?%t|Yes|No", choise_animation)
+		if(choise_animation==1):
 			for animation in Animations:
 				getAnimation(ys, animation, n)
 
@@ -2984,16 +2977,16 @@ def osgParser(filename):
 		drawMesh(ys, mesh)
 
 	#model.getMat()
-	result=1
-	#result=Blender.Draw.PupMenu("Send meshes to startpose?%t|Yes|No")
-	print("Send meshes to startpose?%t|Yes|No", result)
+	choise_pose=1
+	#choise_pose=Blender.Draw.PupMenu("Send meshes to startpose?%t|Yes|No")
+	print("Send meshes to startpose?%t|Yes|No", choise_pose)
 
-	result10=1
+	choise_meshes=1
 	if(len(model.meshList)>10):
-		#result10=Blender.Draw.PupMenu("import "+str(len(model.meshList))+" meshes "+"?%t|Yes|No")
-		print("import "+str(len(model.meshList))+" meshes "+"?%t|Yes|No", result10)
+		#choise_meshes=Blender.Draw.PupMenu("import "+str(len(model.meshList))+" meshes "+"?%t|Yes|No")
+		print("import "+str(len(model.meshList))+" meshes "+"?%t|Yes|No", choise_meshes)
 
-	if(result10==1):
+	if(choise_meshes==1):
 		for i1, mesh in enumerate(model.meshList):
 			print(f'(\'Mesh #:\', {i1}, \'vert:\', {len(mesh.vertPosList)}, \'col:\', {len(mesh.vertColList)}, \'uv:\', {len(mesh.vertUVList)}, \'indice:\', {len(mesh.indiceList)}, \'mat:\', {len(mesh.matList)}, \'skin:\', {len(mesh.skinList)})')
 			#Blender.Window.DrawProgressBar(float((i1)/float(len(model.meshList))), str(len(model.meshList)-1-i1))
@@ -3006,7 +2999,7 @@ def osgParser(filename):
 					mesh.boneNameList=['']*len(mesh.BoneMap)
 					for boneName in mesh.BoneMap:
 						for bone in skeleton.boneList:
-							if(bone.Name==boneName):
+							if(bone.name==boneName): ###if(bone.Name==boneName):
 								id=mesh.BoneMap[boneName]
 								skin.boneMap[id]=id
 								mesh.boneNameList[id]=bone.name
@@ -3018,36 +3011,36 @@ def osgParser(filename):
 				if(bindskeleton.object and skeleton.object):
 					if(mesh.parentBone and len(mesh.skinList)>0):
 						mesh.draw()
-						mesh.object.getData(mesh=1).transform(mesh.parentBone.matrix)
-						mesh.object.getData(mesh=1).update()
+						mesh.object.data.transform(mesh.parentBone.matrix.transposed())
+						mesh.object.data.update()
 						#mesh.object.setMatrix(mesh.parentBone.matrix)
-						if(result==1):
+						if(choise_pose==1):
 							bindPose(bindskeleton.object, skeleton.object, mesh.object)
-						skeleton.object.makeParentDeform([mesh.object], 1, 0)
+						mesh.object.parent = skeleton.object
 					elif(mesh.parentBone and len(mesh.skinList)==0):
 						mesh.setSkin(mesh.parentBone.name)
 						mesh.draw()
-						mesh.object.getData(mesh=1).transform(mesh.parentBone.matrix)
-						mesh.object.getData(mesh=1).update()
-						skeleton.object.makeParentDeform([mesh.object], 1, 0)
+						mesh.object.data.transform(mesh.parentBone.matrix.transposed())
+						mesh.object.data.update()
+						mesh.object.parent = skeleton.object
 				else:
 					if(mesh.parentBone):
 						if(len(mesh.skinList)==0):
 							mesh.setSkin(mesh.parentBone.name)
 						mesh.draw()
-						mesh.object.getData(mesh=1).transform(mesh.parentBone.matrix)
-						mesh.object.getData(mesh=1).update()
+						mesh.object.data.transform(mesh.parentBone.matrix.transposed())
+						mesh.object.data.update()
 						#mesh.object.setMatrix(mesh.parentBone.matrix)
 						#skeleton.object.makeParentBone([mesh.object], mesh.parentBone.name, 0, 0)
 						if(skeleton.object and skeleton.object):
-							skeleton.object.makeParentDeform([mesh.object], 1, 0)
+							mesh.object.parent = skeleton.object
 					else:
 						#print(len(mesh.vertPosList))
 						#print(mesh.indiceList)
 						#mesh.indiceList=[]
 						mesh.draw()
-						#mesh.object.getData(mesh=1).transform(mesh.parentBone.matrix)
-						#mesh.object.getData(mesh=1).update()
+						#mesh.object.data.transform(mesh.parentBone.matrix)
+						#mesh.object.data.update()
 						#mesh.object.setMatrix(mesh.parentBone.matrix)
 
 				"""
@@ -3072,7 +3065,6 @@ def osgParser(filename):
 
 
 
-
 		model.set()
 
 
@@ -3087,11 +3079,11 @@ def osgParser(filename):
 
 		#for i, mesh in enumerate(model.meshList):
 		#	Blender.Window.DrawProgressBar(float(i/float(len(model.meshList)+1)), str(-1+len(model.meshList)-i))
-		#print('result:', result)
-		if(result!=2):
+		#print('choise_pose:', choise_pose)
+		if(choise_pose!=2):
 			if	bindskeleton.object:
 				scene = bpy.context.scene
-				scene.objects.unlink(bindskeleton.object)
+				scene.collection.objects.unlink(bindskeleton.object)
 
 def htmParser(filename):
 	ys=Yson()
@@ -3121,7 +3113,7 @@ def htmParser(filename):
 					else:
 						path=os.path.join(sys.dir, os.path.basename(url))
 					exists=os.path.exists(path)
-					#print('ikona', exists, os.path.basename(url)+'.jpg')
+					#print('Icon', exists, os.path.basename(url)+'.jpg')
 					if(exists==True):
 						if(size>SIZE):
 							SIZE=size
@@ -3215,7 +3207,7 @@ def htmParser(filename):
 									write(log, ['path:', path, exists], 12)
 
 									if(format not in IMAGES[uid].keys()):
-										print('NOWY FORMAT:', format)
+										print('NEW FORMAT:', format)
 										IMAGES[uid][format]=[path, exists, quality]
 									else:
 										if(quality and format):
@@ -3244,7 +3236,7 @@ def htmParser(filename):
 	for image in allImagePaths:
 		if(image not in usedImagePaths):
 			if(os.path.exists(image)==True):
-				print('usuwam:', image)
+				print('Exists:', image)
 				#os.remove(image)
 
 	materials=ys.get(ys.root, b'"materials"')
@@ -3457,10 +3449,10 @@ def Parser(path):
 		if(os.path.exists(model)):
 			print('--modelo', model)
 
-			result=2
-			#result=Blender.Draw.PupMenu("Sketchfab Viewer ?%t|Yes|No")
-			print("Sketchfab Viewer ?%t|Yes|No", result)
-			if(result==1):
+			choise_viewer=2
+			#choise_viewer=Blender.Draw.PupMenu("Sketchfab Viewer ?%t|Yes|No")
+			print("Sketchfab Viewer ?%t|Yes|No", choise_viewer)
+			if(choise_viewer==1):
 				canonical=getCanonical(filename)
 				chromeExe="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 				#os.system(chromeExe)
@@ -3480,20 +3472,20 @@ def Parser(path):
 			else:
 
 
-				result=1
+				choise_filesize=1
 				fileSize=os.path.getsize(model)
-				result=Blender.Draw.PupMenu("import "+str(round(fileSize/1000000.0, 1))+" Mb ?%t|Yes|No")
-				print("import "+str(round(fileSize/1000000.0, 1))+" Mb ?%t|Yes|No", result)
+				choise_filesize=Blender.Draw.PupMenu("import "+str(round(fileSize/1000000.0, 1))+" Mb ?%t|Yes|No")
+				print("import "+str(round(fileSize/1000000.0, 1))+" Mb ?%t|Yes|No", choise_filesize)
 
 				print('--filename', filename)
 				htmParser(filename)
-				if(result==1):
+				if(choise_filesize==1):
 					skipdecode=0
 
-					result=1
-					result=Blender.Draw.PupMenu("indice problem"+" ?%t|Yes|No")
-					print("indice problem"+" ?%t|Yes|No", result)
-					if(result==1):
+					choise_indexProblem=1
+					choise_indexProblem=Blender.Draw.PupMenu("indice problem"+" ?%t|Yes|No")
+					print("indice problem"+" ?%t|Yes|No", choise_indexProblem)
+					if(choise_indexProblem==1):
 						skipdecode=1
 
 
@@ -3585,10 +3577,9 @@ def unregister():
 
 #Blender.Window.FileSelector(Parser, 'import', 'htm files: *.... - model')
 
-def test():
+def test(path):
 	os.system('cls')
-	#Parser(r'C:\Users\Rodrigo\Downloads\sketchfab\PythonRipper\Models\Maria Naruse\file.osgjs')
-	Parser(r"C:\Users\Rodrigo\Downloads\sketchfab\PythonRipper\Models\Marina (Off the Hook)\file.osgjs")
+	Parser(path)
 
 if(__name__ == "__main__"):
 	test()

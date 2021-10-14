@@ -189,4 +189,4 @@ class Obrazek():
 								#)
 								#newfile.close()
 							else:
-								print('WARNING: nieznany format',self.format)
+								print('WARNING: unknown format',self.format)

@@ -38,7 +38,7 @@ def bintostr(binname):
 	return name
 
 def setBoneMatrix(object,skeletonObject,boneName):
-	bones=skeletonObject.getData().bones
+	bones=skeletonObject.data.bones
 	if boneName in bones.keys():
 		matrix=bones[boneName].matrix['ARMATURESPACE']
 		object.setMatrix(object.matrixWorld*matrix)
@@ -48,7 +48,7 @@ def removeMaterials():
 		for ob in scn.objects.context:
 				if not ob.lib and ob.type == 'Mesh':    # object isn't from a library and is a mesh
 
-						me = ob.getData(mesh=1)
+						me = ob.data
 						nme=NMesh.GetRaw(me.name)
 						mats = nme.materials
 						i=0
@@ -565,7 +565,7 @@ def ParseID():
 		for object in scene.objects:
 			if object.type=='Mesh':
 				try:
-					meshID = int(object.getData(mesh=1).name.split('-')[0])
+					meshID = int(object.data.name.split('-')[0])
 					ids.append(meshID)
 				except:pass
 		try:
@@ -579,16 +579,16 @@ class SceneIDList:
 	def __init__(self):
 		meshIDList=[]
 		objectIDList=[]
-		szkieletIDList=[]
+		armatureIDList=[]
 		scene = bpy.context.scene
 		for object in scene.objects:
 			if object.type=='Mesh':
 				try:
-					meshID = int(object.getData(mesh=1).name.split('-')[0])
+					meshID = int(object.data.name.split('-')[0])
 					meshIDList.append(meshID)
 				except:pass
 				try:
-					objectID = int(object.getData(mesh=1).name.split('-')[2])
+					objectID = int(object.data.name.split('-')[2])
 					objectIDList.append(objectID)
 				except:pass
 		for mesh in bpy.data.meshes:
@@ -599,7 +599,7 @@ class SceneIDList:
 		for mesh in bpy.data.armatures:
 				try:
 					ID = int(mesh.name.split('-')[1])
-					szkieletIDList.append(ID)
+					armatureIDList.append(ID)
 				except:pass
 		try:
 			self.meshID = max(meshIDList)+1
@@ -610,9 +610,9 @@ class SceneIDList:
 		except:
 			self.objectID = 0
 		try:
-			self.szkieletID = max(szkieletIDList)+1
+			self.armatureID = max(armatureIDList)+1
 		except:
-			self.szkieletID = 0
+			self.armatureID = 0
 		#scene.update()
 		bpy.context.view_layer.update()
 

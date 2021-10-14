@@ -48,7 +48,7 @@ class Action:
 			scene = bpy.context.scene
 			for object in scene.objects:
 				if object.name==self.skeleton:
-					self.boneNameList=object.getData().bones.keys()
+					self.boneNameList=object.data.bones.keys()
 
 
 	def setContext(self,fps=30):
@@ -97,7 +97,7 @@ class Action:
 			if shapeObject:
 				#try:
 					if shapeObject.getType()=='Mesh':
-						mesh=shapeObject.getData(mesh=1)
+						mesh=shapeObject.data
 						if mesh:
 							print('shape animation'	)
 							Blender.Set("curframe",1)
@@ -106,8 +106,8 @@ class Action:
 								frame=self.shapeFrameList[n]
 								shape=self.shapeKeyList[n]
 								Blender.Set("curframe",frame)
-								for id in range(len(mesh.verts)):
-									mesh.verts[id].co = Vector(shape[id])
+								for id in range(len(mesh.vetices)):
+									mesh.vetices[id].co = Vector(shape[id])
 								mesh.update()
 								#Blender.Window.RedrawAll()
 								shapeObject.insertShapeKey()
@@ -125,7 +125,7 @@ class Action:
 				if object.type=='Armature':
 					skeleton = object
 		if skeleton is not None:
-			armature=skeleton.getData()
+			armature=skeleton.data
 			pose = skeleton.getPose()
 			action = Blender.Armature.NLA.NewAction(self.name)
 			action.setActive(skeleton)
