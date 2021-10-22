@@ -703,7 +703,10 @@ class Mesh():
 					for poly in self.mesh.polygons:
 						for loop_index in poly.loop_indices:
 							vertex_index = self.mesh.loops[loop_index].vertex_index
-							vcolors.data[loop_index].color = list(map(lambda x : x /255, self.vertColList[vertex_index]))
+							color = list(map(lambda x : x / 255, self.vertColList[vertex_index]))
+							if len(color) == 3:
+								color.append(1)
+							vcolors.data[loop_index].color = color
 							#write(log,self.vertColList[v.index],0)
 					print('MESH USES VERTEX COLOR')
 				else:
