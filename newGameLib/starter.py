@@ -47,7 +47,7 @@ class BinaryReader():
 		self.debug=False
 		self.stream={}
 		self.logfile=None
-		self.log=False
+		self.log=True
 		self.dirname=os.path.dirname(self.inputFile.name)
 		basename, ext = os.path.splitext(os.path.basename(self.inputFile.name))
 		self.basename=basename
@@ -69,7 +69,6 @@ class BinaryReader():
 					self.xorOffset=0
 				else:
 					self.xorOffset+=1
-
 
 	def logOpen(self):
 		logDir='log'
@@ -118,8 +117,6 @@ class BinaryReader():
 				data.fromfile(self.inputFile, n)
 				if(self.endian == ">"):
 					data.byteswap()
-
-
 			else:
 				data=struct.unpack(self.endian+n*4*'B', self.inputFile.read(n*4))
 				self.XOR(data)
@@ -161,8 +158,6 @@ class BinaryReader():
 				data.fromfile(self.inputFile, n)
 				if(self.endian == ">"):
 					data.byteswap()
-
-
 			else:
 				data=struct.unpack(self.endian+n*'B', self.inputFile.read(n))
 				self.XOR(data)
@@ -177,6 +172,7 @@ class BinaryReader():
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'B', n[m])
 				self.inputFile.write(data)
+
 	def b(self, n):
 		if(self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
@@ -210,8 +206,6 @@ class BinaryReader():
 				data.fromfile(self.inputFile, n)
 				if(self.endian == ">"):
 					data.byteswap()
-
-
 			else:
 				data=struct.unpack(self.endian+n*2*'B', self.inputFile.read(n*2))
 				self.XOR(data)
@@ -236,8 +230,6 @@ class BinaryReader():
 				data.fromfile(self.inputFile, n)
 				if(self.endian == ">"):
 					data.byteswap()
-
-
 			else:
 				data=struct.unpack(self.endian+n*2*'B', self.inputFile.read(n*2))
 				self.XOR(data)
@@ -337,8 +329,6 @@ class BinaryReader():
 			if(self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(offset)+'	'+str(array)+'\n')
 		return array
-
-
 
 	def find(self, var):
 		start=self.inputFile.tell()
@@ -485,8 +475,6 @@ class BinaryReader():
 				offset=self.inputFile.tell()
 				s=''
 				for j in range(0, long):
-
-
 					if(self.xorKey is None):
 						lit =  struct.unpack('c', self.inputFile.read(1))[0]
 						#data=struct.unpack(self.endian+n*'i', self.inputFile.read(n*4))
@@ -496,9 +484,6 @@ class BinaryReader():
 						lit=struct.unpack(self.endian+'c', self.xorData)[0]
 
 						#lit =	struct.unpack('c', self.inputFile.read(1))[0]
-
-
-
 					if(ord(lit)!=0):
 						s+=lit
 				if(self.debug==True):
@@ -569,57 +554,57 @@ def getMatName(ys, parent):
 	#print('getMatName')
 	matName=None
 	if	matName not in MATERIALS.keys():
-		UniqueID=ys.get(parent, b'"UniqueID"')
+		UniqueID=ys.get(parent, '"UniqueID"')
 		if(UniqueID):
 			values=ys.values(UniqueID[0].header, 's')
 			if(len(values)>1):
-				if(b'"' in values[1] and b'_' in values[1]):
-					matName=values[1].split(b'"')[3].split(b'_')[-2]
+				if('"' in values[1] and '_' in values[1]):
+					matName=values[1].split('"')[3].split('_')[-2]
 
 	rgba=None
-	AttributeList=ys.get(parent, b'"AttributeList"')
+	AttributeList=ys.get(parent, '"AttributeList"')
 	if(AttributeList):
 		values=ys.values(AttributeList[0].header, ':')
-		UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
-		Diffuse=ys.get(parent, b'"Diffuse"')
+		UniqueID=ys.getValue(values, '"UniqueID"', 'i')
+		Diffuse=ys.get(parent, '"Diffuse"')
 		if(Diffuse):
 			rgba=ys.values(Diffuse[0].data, 'f')
 		if	matName not in MATERIALS.keys():
-			Material=ys.get(AttributeList[0], b'"osg.Material"')
+			Material=ys.get(AttributeList[0], '"osg.Material"')
 			if(Material):
 				for a in Material[0].children:
-					if(b'"Name"' in a.header):
-						splits=a.header.split(b'"')
+					if('"Name"' in a.header):
+						splits=a.header.split('"')
 						if(len(splits)>4):
 							matName=splits[5]
-							if(b':' in matName):
+							if(':' in matName):
 								matName=matName.replace(':', '')
 							model.matList[UniqueID]=matName
 
 	if	matName not in MATERIALS.keys():
-		StateSet=ys.get(parent, b'"StateSet"')
+		StateSet=ys.get(parent, '"StateSet"')
 		if(StateSet):
-			osgStateSet=ys.get(StateSet[0], b'"osg.StateSet"')
+			osgStateSet=ys.get(StateSet[0], '"osg.StateSet"')
 			if(osgStateSet):
 				if(len(osgStateSet[0].children)>0):
 					for child in osgStateSet[0].children:
 						values=ys.values(child.header, ':')
-						if(b'"UniqueID"' in values and b'"Name"' in values):
-							UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
-							matName=ys.getValue(values, b'"Name"', '""')
+						if('"UniqueID"' in values and '"Name"' in values):
+							UniqueID=ys.getValue(values, '"UniqueID"', 'i')
+							matName=ys.getValue(values, '"Name"', '""')
 							model.matList[UniqueID]=matName
 				else:
 					values=ys.values(osgStateSet[0].data, ':')
-					if(b'"AttributeList"' not in values):
-						UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
+					if('"AttributeList"' not in values):
+						UniqueID=ys.getValue(values, '"UniqueID"', 'i')
 						if(UniqueID in model.matList):
 							matName=model.matList[UniqueID]
 
 	if	matName:
 		if	len(matName)==0:
-			matName=b'RootNode'
-		if(b'\xef' in matName):
-			matName=matName.split(b'\xef')[0]
+			matName='RootNode'
+		if('\xef' in matName):
+			matName=matName.split('\xef')[0]
 	diffuse=None
 	normal=None
 	specular=None
@@ -757,32 +742,32 @@ def getMatName(ys, parent):
 						if(imageType=='DiffuseColor'):
 							rgbCol=MATERIALS[key][imageType][1]
 
-	TextureAttributeList=ys.get(parent, b'"TextureAttributeList"')
+	TextureAttributeList=ys.get(parent, '"TextureAttributeList"')
 	if(TextureAttributeList):
 			#print('here')
-			osg_Texture=ys.get(parent, b'"osg.Texture"')
+			osg_Texture=ys.get(parent, '"osg.Texture"')
 			if(osg_Texture):
 				values=ys.values(osg_Texture[0].data, ':')
-				hash=ys.getValue(values, b'"File"', '""')
+				hash=ys.getValue(values, '"File"', '""')
 				if(hash):
-					if(b'/' in hash):
-						hash=hash.split(b'/')[1]
+					if('/' in hash):
+						hash=hash.split('/')[1]
 						#print(hash)
 						if(hash in IMAGES.keys()):
-							if(IMAGES[hash][b'RGB']):
-								path, exists, quality=IMAGES[hash][b'RGB']
+							if(IMAGES[hash]['RGB']):
+								path, exists, quality=IMAGES[hash]['RGB']
 								if(exists==1):
 									diffuse=path
-							if(IMAGES[hash][b'A']):
-								path, exists, quality=IMAGES[hash][b'A']
+							if(IMAGES[hash]['A']):
+								path, exists, quality=IMAGES[hash]['A']
 								if(exists==1):
 									trans=path
-							if(IMAGES[hash][b'N']):
-								path, exists, quality=IMAGES[hash][b'N']
+							if(IMAGES[hash]['N']):
+								path, exists, quality=IMAGES[hash]['N']
 								if(exists==1):
-									if(imageType==b'NormalMap'):
+									if(imageType=='NormalMap'):
 										normal=path
-									if(imageType==b'BumpMap'):
+									if(imageType=='BumpMap'):
 										normal=path
 
 	return matName, diffuse, specular, normal, ao, trans, rgbCol, rgbSpec, rgba
@@ -791,7 +776,7 @@ def getMatName(ys, parent):
 def getSplitName(name, what, which):
 	a=None
 	if(what in name):
-		a=b''
+		a=''
 		splits=name.split(what)
 		if(which<0):
 			num=len(splits)+which-1
@@ -972,23 +957,23 @@ def getAnimation(ys, A, n):
 	action.FRAMESORT=True
 	action.skeleton=skeleton.name
 	n+=4
-	Channels=ys.get(A, b'"Channels"')
+	Channels=ys.get(A, '"Channels"')
 	boneList={}
 	if(Channels):
 		values=ys.values(Channels[0].header, ':')
-		Name=ys.getValue(values, b'"Name"')
+		Name=ys.getValue(values, '"Name"')
 		action.name=Name
-		new=New(Name.replace(b'"', b'').replace(b'|', b'')+b'.action', 'wb', sys).open()
+		new=New(Name.replace('"', '').replace('|', '')+'.action', 'wb', sys).open()
 		for a in  Channels[0].children:
-			Vec3LerpChannel=ys.get(a, b'"osgAnimation.Vec3LerpChannel"')
+			Vec3LerpChannel=ys.get(a, '"osgAnimation.Vec3LerpChannel"')
 			if(Vec3LerpChannel):
-				KeyFrames=ys.get(a, b'"KeyFrames"')
+				KeyFrames=ys.get(a, '"KeyFrames"')
 				if(KeyFrames):
 					values=ys.values(KeyFrames[0].header, ':')
-					Name=ys.getValue(values, b'"Name"')
-					TargetName=ys.getValue(values, b'"TargetName"', '""')
-					name=getSplitName(TargetName, b'_', -1)
-					if(Name==b'"translate"'):
+					Name=ys.getValue(values, '"Name"')
+					TargetName=ys.getValue(values, '"TargetName"', '""')
+					name=getSplitName(TargetName, '_', -1)
+					if(Name=='"translate"'):
 						bone=None
 						if(TargetName in boneIndeksList):
 							name=boneIndeksList[TargetName]
@@ -1002,25 +987,25 @@ def getAnimation(ys, A, n):
 							print('skiped translate bone:', TargetName)
 
 
-						Key=ys.get(a, b'"Key"')
+						Key=ys.get(a, '"Key"')
 						if(Key):
 							values=ys.values(Key[0].data, ':')
-							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-							Float32Array=ys.get(Key[0], b'"Float32Array"')
+							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+							Float32Array=ys.get(Key[0], '"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=ys.getValue(values, b'"Size"')
-								Offset=ys.getValue(values, b'"Offset"')
+								File=ys.getValue(values, '"File"')
+								Size=ys.getValue(values, '"Size"')
+								Offset=ys.getValue(values, '"Offset"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1046,25 +1031,25 @@ def getAnimation(ys, A, n):
 						else:
 							print('no key')
 
-						Time=ys.get(a, b'"Time"')
+						Time=ys.get(a, '"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], b'"Float32Array"')
+							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], '"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=ys.getValue(values, b'"Size"')
-								Offset=ys.getValue(values, b'"Offset"')
+								File=ys.getValue(values, '"File"')
+								Size=ys.getValue(values, '"Size"')
+								Offset=ys.getValue(values, '"Offset"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1102,25 +1087,25 @@ def getAnimation(ys, A, n):
 							print('skiped scale bone:', TargetName)
 
 
-						Key=ys.get(a, b'"Key"')
+						Key=ys.get(a, '"Key"')
 						if(Key):
 							values=ys.values(Key[0].data, ':')
-							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-							Float32Array=ys.get(Key[0], b'"Float32Array"')
+							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+							Float32Array=ys.get(Key[0], '"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=ys.getValue(values, b'"Size"')
-								Offset=ys.getValue(values, b'"Offset"')
+								File=ys.getValue(values, '"File"')
+								Size=ys.getValue(values, '"Size"')
+								Offset=ys.getValue(values, '"Offset"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1146,25 +1131,25 @@ def getAnimation(ys, A, n):
 						else:
 							print('no key')
 
-						Time=ys.get(a, b'"Time"')
+						Time=ys.get(a, '"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], b'"Float32Array"')
+							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], '"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=ys.getValue(values, b'"Size"')
-								Offset=ys.getValue(values, b'"Offset"')
+								File=ys.getValue(values, '"File"')
+								Size=ys.getValue(values, '"Size"')
+								Offset=ys.getValue(values, '"Offset"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1188,29 +1173,29 @@ def getAnimation(ys, A, n):
 						else:
 							print('no time')
 
-			Vec3LerpChannelCompressedPacked=ys.get(a, b'"osgAnimation.Vec3LerpChannelCompressedPacked"')
+			Vec3LerpChannelCompressedPacked=ys.get(a, '"osgAnimation.Vec3LerpChannelCompressedPacked"')
 			if(Vec3LerpChannelCompressedPacked):
 
 				atributes={}
-				UserDataContainer=ys.get(Vec3LerpChannelCompressedPacked[0], b'"UserDataContainer"')
+				UserDataContainer=ys.get(Vec3LerpChannelCompressedPacked[0], '"UserDataContainer"')
 				if(UserDataContainer):
-					Values=ys.get(UserDataContainer[0], b'"Values"')
+					Values=ys.get(UserDataContainer[0], '"Values"')
 					if(Values):
 						for child in Values[0].children:
 							values=ys.values(child.data, ':')
-							Name=ys.getValue(values, b'"Name"')
-							Value=ys.getValue(values, b'"Value"', '"f"')
+							Name=ys.getValue(values, '"Name"')
+							Value=ys.getValue(values, '"Value"', '"f"')
 							#write(log, [Name, Value], n+4)
 							atributes[Name]=Value
 
-				KeyFrames=ys.get(a, b'"KeyFrames"')
+				KeyFrames=ys.get(a, '"KeyFrames"')
 				if(KeyFrames):
 					values=ys.values(KeyFrames[0].header, ':')
-					Name=ys.getValue(values, b'"Name"')
-					TargetName=ys.getValue(values, b'"TargetName"', '""')
+					Name=ys.getValue(values, '"Name"')
+					TargetName=ys.getValue(values, '"TargetName"', '""')
 					#write(log, ['Vec3LerpChannelCompressedPacked:', Name, 'TargetName:', TargetName], n+4)
-					name=getSplitName(TargetName, b'_', -1)
-					if(Name==b'"translate"'):
+					name=getSplitName(TargetName, '_', -1)
+					if(Name=='"translate"'):
 						bone=None
 						if(TargetName in boneIndeksList):
 							#new.write(TargetName+'\x00')
@@ -1225,28 +1210,28 @@ def getAnimation(ys, A, n):
 						else:
 							print('skiped translate bone:', TargetName)
 
-						Key=ys.get(a, b'"Key"')
+						Key=ys.get(a, '"Key"')
 						if(Key):
 							values=ys.values(Key[0].data, ':')
-							ItemSize=int(ys.getValue(values, b'"ItemSize"'))
-							Uint16Array=ys.get(Key[0], b'"Uint16Array"')
+							ItemSize=int(ys.getValue(values, '"ItemSize"'))
+							Uint16Array=ys.get(Key[0], '"Uint16Array"')
 							type="Uint16Array"
 							if(Uint16Array):
 								values=ys.values(Uint16Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=int(ys.getValue(values, b'"Size"'))
-								Offset=int(ys.getValue(values, b'"Offset"'))
-								#Encoding=ys.getValue(values, b'"Encoding"')
+								File=ys.getValue(values, '"File"')
+								Size=int(ys.getValue(values, '"Size"'))
+								Offset=int(ys.getValue(values, '"Offset"'))
+								#Encoding=ys.getValue(values, '"Encoding"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding, 'ItemSize:', ItemSize], n+4)
 
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1280,25 +1265,25 @@ def getAnimation(ys, A, n):
 						else:
 							print('no key')
 
-						Time=ys.get(a, b'"Time"')
+						Time=ys.get(a, '"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], b'"Float32Array"')
+							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], '"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=ys.getValue(values, b'"Size"', 'i')
-								Offset=ys.getValue(values, b'"Offset"', 'i')
+								File=ys.getValue(values, '"File"')
+								Size=ys.getValue(values, '"Size"', 'i')
+								Offset=ys.getValue(values, '"Offset"', 'i')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1326,15 +1311,15 @@ def getAnimation(ys, A, n):
 						else:
 							print('no time')
 
-			QuatSlerpChannel=ys.get(a, b'"osgAnimation.QuatSlerpChannel"')
+			QuatSlerpChannel=ys.get(a, '"osgAnimation.QuatSlerpChannel"')
 			if(QuatSlerpChannel):
-				KeyFrames=ys.get(a, b'"KeyFrames"')
+				KeyFrames=ys.get(a, '"KeyFrames"')
 				if(KeyFrames):
 					values=ys.values(KeyFrames[0].header, ':')
-					Name=ys.getValue(values, b'"Name"')
-					TargetName=ys.getValue(values, b'"TargetName"', '""')
+					Name=ys.getValue(values, '"Name"')
+					TargetName=ys.getValue(values, '"TargetName"', '""')
 					#write(log, ['QuatSlerpChannel:', Name, 'TargetName:', TargetName], n+4)
-					name=getSplitName(TargetName, b'_', -1)
+					name=getSplitName(TargetName, '_', -1)
 					bone=None
 					if(TargetName in boneIndeksList):
 						name=boneIndeksList[TargetName]
@@ -1347,25 +1332,25 @@ def getAnimation(ys, A, n):
 					else:
 						print('skiped quaternion bone:', TargetName)
 
-					Key=ys.get(a, b'"Key"')
+					Key=ys.get(a, '"Key"')
 					if(Key):
 						values=ys.values(Key[0].data, ':')
-						ItemSize=ys.getValue(values, b'"ItemSize"')
-						Float32Array=ys.get(Key[0], b'"Float32Array"')
+						ItemSize=ys.getValue(values, '"ItemSize"')
+						Float32Array=ys.get(Key[0], '"Float32Array"')
 						if(Float32Array):
 							values=ys.values(Float32Array[0].data, ':')
-							File=ys.getValue(values, b'"File"')
-							Size=ys.getValue(values, b'"Size"')
-							Offset=ys.getValue(values, b'"Offset"')
+							File=ys.getValue(values, '"File"')
+							Size=ys.getValue(values, '"Size"')
+							Offset=ys.getValue(values, '"Offset"')
 							#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 							if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 								cmd=Cmd()
 								cmd.input=path
 								cmd.ZIP=True
 								cmd.run()
-							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 							if(os.path.exists(path)==False):
 								path+='.gz.txt'
 
@@ -1390,25 +1375,25 @@ def getAnimation(ys, A, n):
 										bone.rotKeyList.append(matrix)
 								file.close()
 
-					Time=ys.get(a, b'"Time"')
+					Time=ys.get(a, '"Time"')
 					if(Time):
 						values=ys.values(Time[0].data, ':')
-						ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-						Float32Array=ys.get(Time[0], b'"Float32Array"')
+						ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+						Float32Array=ys.get(Time[0], '"Float32Array"')
 						if(Float32Array):
 							values=ys.values(Float32Array[0].data, ':')
-							File=ys.getValue(values, b'"File"')
-							Size=ys.getValue(values, b'"Size"')
-							Offset=ys.getValue(values, b'"Offset"')
+							File=ys.getValue(values, '"File"')
+							Size=ys.getValue(values, '"Size"')
+							Offset=ys.getValue(values, '"Offset"')
 							#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 							if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 								cmd=Cmd()
 								cmd.input=path
 								cmd.ZIP=True
 								cmd.run()
-							path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+							path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 							if(os.path.exists(path)==False):
 								path+='.gz.txt'
 
@@ -1427,30 +1412,30 @@ def getAnimation(ys, A, n):
 										bone.rotFrameList.append(int(value*33))
 								file.close()
 
-			QuatSlerpChannelCompressedPacked=ys.get(a, b'"osgAnimation.QuatSlerpChannelCompressedPacked"')
+			QuatSlerpChannelCompressedPacked=ys.get(a, '"osgAnimation.QuatSlerpChannelCompressedPacked"')
 			if(QuatSlerpChannelCompressedPacked):
 				TargetName=None
 				try:
 
 					atributes={}
-					UserDataContainer=ys.get(QuatSlerpChannelCompressedPacked[0], b'"UserDataContainer"')
+					UserDataContainer=ys.get(QuatSlerpChannelCompressedPacked[0], '"UserDataContainer"')
 					if(UserDataContainer):
-						Values=ys.get(UserDataContainer[0], b'"Values"')
+						Values=ys.get(UserDataContainer[0], '"Values"')
 						if(Values):
 							for child in Values[0].children:
 								values=ys.values(child.data, ':')
-								Name=ys.getValue(values, b'"Name"')
-								Value=ys.getValue(values, b'"Value"', '"f"')
+								Name=ys.getValue(values, '"Name"')
+								Value=ys.getValue(values, '"Value"', '"f"')
 								#write(log, [Name, Value], n+4)
 								atributes[Name]=Value
 
-					KeyFrames=ys.get(a, b'"KeyFrames"')
+					KeyFrames=ys.get(a, '"KeyFrames"')
 					if(KeyFrames):
 						values=ys.values(KeyFrames[0].header, ':')
-						Name=ys.getValue(values, b'"Name"')
-						TargetName=ys.getValue(values, b'"TargetName"', '""')
+						Name=ys.getValue(values, '"Name"')
+						TargetName=ys.getValue(values, '"TargetName"', '""')
 						#write(log, ['QuatSlerpChannelCompressedPacked:', Name, 'TargetName:', TargetName], n+4)
-						name=getSplitName(TargetName, b'_', -1)
+						name=getSplitName(TargetName, '_', -1)
 						#print(TargetName)
 						bone=None
 						#print(TargetName)
@@ -1466,30 +1451,30 @@ def getAnimation(ys, A, n):
 						else:
 							print('skiped quaternion bone:', TargetName)
 
-						Key=ys.get(a, b'"Key"')
+						Key=ys.get(a, '"Key"')
 						if(Key):
 							values=ys.values(Key[0].data, ':')
-							ItemSize=int(ys.getValue(values, b'"ItemSize"'))
-							Uint16Array=ys.get(Key[0], b'"Uint16Array"')
+							ItemSize=int(ys.getValue(values, '"ItemSize"'))
+							Uint16Array=ys.get(Key[0], '"Uint16Array"')
 							type="Uint16Array"
 							if(Uint16Array):
 								values=ys.values(Uint16Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=int(ys.getValue(values, b'"Size"'))
-								Offset=int(ys.getValue(values, b'"Offset"'))
-								#Encoding=ys.getValue(values, b'"Encoding"')
+								File=ys.getValue(values, '"File"')
+								Size=int(ys.getValue(values, '"Size"'))
+								Offset=int(ys.getValue(values, '"Offset"'))
+								#Encoding=ys.getValue(values, '"Encoding"')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding, 'ItemSize:', ItemSize], n+4)
 
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
-									path+=b'.gz.txt'
+									path+='.gz.txt'
 
 								if(os.path.exists(path)):
 									file=open(path, 'rb')
@@ -1525,25 +1510,25 @@ def getAnimation(ys, A, n):
 												bone.rotKeyList.append(matrix)
 									file.close()
 
-						Time=ys.get(a, b'"Time"')
+						Time=ys.get(a, '"Time"')
 						if(Time):
 							values=ys.values(Time[0].data, ':')
-							ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-							Float32Array=ys.get(Time[0], b'"Float32Array"')
+							ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+							Float32Array=ys.get(Time[0], '"Float32Array"')
 							if(Float32Array):
 								values=ys.values(Float32Array[0].data, ':')
-								File=ys.getValue(values, b'"File"')
-								Size=ys.getValue(values, b'"Size"', 'i')
-								Offset=ys.getValue(values, b'"Offset"', 'i')
+								File=ys.getValue(values, '"File"')
+								Size=ys.getValue(values, '"Size"', 'i')
+								Offset=ys.getValue(values, '"Offset"', 'i')
 								#write(log, [File, 'Size:', Size, 'Offset:', Offset, 'ItemSize:', ItemSize], n+4)
 
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1])
 								if(os.path.exists(path)==True and os.path.exists(path.split('.gz')[0])==False):
 									cmd=Cmd()
 									cmd.input=path
 									cmd.ZIP=True
 									cmd.run()
-								path=os.path.join(os.path.dirname(filename), File.split(b'"')[1].split(b'.gz')[0].decode())
+								path=os.path.join(os.path.dirname(filename), File.split('"')[1].split('.gz')[0])
 								if(os.path.exists(path)==False):
 									path+='.gz.txt'
 
@@ -1606,7 +1591,7 @@ def decodeVarint(g, offset, size, type:str):
 def decodeDelta(t, e):
 	i=e|0
 	n=len(t)
-	if(i>=len(t)):
+	if (i>=len(t)):
 		r=None
 	else:
 		r=t[i]
@@ -1714,237 +1699,11 @@ def decodePredict(indices, input, itemsize):
 			s+=1
 	return t
 
-
-
-class Node:
-	def __init__(self):
-		self.name=None
-		self.children=[]
-		self.osgChildren=[]
-		self.offset=None
-		self.start=None
-		self.end=None
-		self.header=b''
-		self.data=b''
-		self.parent=None
-
-class Yson:
-	def __init__(self):
-		self.input=None
-		self.filename=None
-		self.root=Node()
-		self.log=False
-
-	def parse(self):
-		global offset, string, txt
-		if(self.filename is not None):
-			file=open(self.filename, 'rb')
-			self.input=file.read().replace(b'\x20', b'').replace(b'\x0A', b'').replace(b'&#34;', b'"')
-			line=self.input
-			if(self.log==True):
-				txt=open(self.filename+'.ys', 'w')
-
-			if(line is not None and len(line)>0):
-				offset=0
-				n=0
-				string=[]
-				if(self.input[offset]==ord(b'{')):
-					if(self.log==True):
-						txt.write('\n')
-						txt.write(' '*n+'header:'+str(None))
-						txt.write(' { '+str(offset))
-						txt.write(' '*(n+4))
-				if(self.input[offset]==ord(b'[')):
-					if(self.log==True):
-						txt.write('\n')
-						txt.write(' '*n+'header:'+str(None))
-						txt.write(' [ '+str(offset))
-						txt.write(' '*(n+4))
-				self.tree(self.root, n)
-				if(self.log==True):
-					txt.write(' '*n)
-
-			file.close()
-
-		if(self.log==True):
-			txt.close()
-
-	def getTree1(self, parent, list, key):
-		for child in parent.children:
-			if(key in child.header):
-				list.append(child)
-			self.getTree(child, list, key)
-
-
-	def getTree(self, parent, list, key):
-		if(key in parent.header or key in parent.data):
-			list.append(parent)
-		for child in parent.children:
-			self.getTree(child, list, key)
-
-	def values(self, data: bytes, type_flg: str):
-		val_list={}
-		#print(f'(\'---===data:\', \'{data.decode()}\', \' type_flg:\', \'{type_flg}\')')
-		A=data.split(b',')
-		if(type_flg==':'):
-			for a in A:
-				if(b':' in a):
-					c=0
-					alist=[]
-					string=b''
-					for b in a:
-						if(b==ord(b'"') and c==0):
-							if(len(string)>0):
-								alist.append(string)
-							string=b''
-							string+=b.to_bytes(1, 'big')
-							c=1
-						elif(b==ord(b'"') and c==1):
-							string+=b.to_bytes(1, 'big')
-							if(len(string)>0):
-								alist.append(string)
-							string=b''
-							c=0
-						elif(b==ord(b':')):
-							pass
-						else:
-							string+=b.to_bytes(1, 'big')
-					if(len(string)>0):
-						alist.append(string)
-					if(len(alist)==2):
-						val_list[alist[0]]=alist[1]
-					if(len(alist)==1):
-						val_list[alist[0]]='None'
-
-					#if(a.count(':')>1):
-		if(type_flg=='f'):
-			val_list=list(map(float, A))
-		if(type_flg=='i'):
-			val_list=list(map(int, A))
-		if(type_flg=='s'):
-			val_list=A
-		return val_list
-
-	def getValue(self, values, name:bytes, type:str=None):
-		if(name in values):
-			if(type=='"f"'):
-				return float(values[name].split(b'"')[1])
-			elif(type=='"i"'):
-				return int(values[name].split(b'"')[1])
-			elif(type=='i'):
-				#print(name, values[name])
-				if(values[name]!='None'):
-					return int(values[name])
-				else:
-					return None
-			elif(type=='""'):
-				return values[name].split(b'"')[1]
-			else:
-				return values[name]
-		else:
-			return None
-
-	def get(self, node, key:bytes):
-		val_list=[]
-		self.getTree(node, val_list, key)
-		if(len(val_list)>0):
-			return val_list
-		else:
-			return None
-
-	def tree(self, parentNode, n):
-		global offset, string
-		n+=4
-		offset+=1
-		while(True):
-			if(offset>=len(self.input)):
-				break
-			value=self.input[offset]
-			if(value==ord(b'}')):
-				if(self.log==True):
-					txt.write('\n')
-					if(len(string)>0):
-						txt.write(' '*n+'data:'+str(self.input[string[0]:offset]))
-					else:
-						txt.write(' '*n+'data:None')
-					txt.write('\n'+' '*n+' } '+str(offset))
-				if(len(string)>0):
-					parentNode.data=self.input[string[0]:offset]
-				string=[]
-				offset+=1
-				break
-
-			elif(value==ord(b'{')):
-				if(self.log==True):
-					txt.write('\n')
-					if(len(string)>0):
-						txt.write(' '*n+'header:'+str(self.input[string[0]:offset]))
-					else:
-						txt.write(' '*n+'header:None')
-					txt.write(' { '+str(offset))
-					txt.write(' '*(n+4))
-				#print(round(100*offset/float(len(self.input)), 3), 'procent')
-				node=Node()
-				node.parent=parentNode
-				parentNode.children.append(node)
-				node.offset=offset
-				if(len(string)>0):
-					node.header=self.input[string[0]:offset]
-				string=[]
-				self.tree(node, n)
-				if(self.log==True):
-					txt.write(' '*n)
-
-			elif(value==ord(b']')):
-				if(len(string)>0):
-					parentNode.data=self.input[string[0]:offset]
-
-				if(self.log==True):
-					txt.write('\n')
-					if(len(string)>0):
-						txt.write(' '*n+'data:'+str(self.input[string[0]:offset])+'\n')
-					else:
-						txt.write(' '*n+'data:None')
-					txt.write(' '*n+' ] '+str(offset))
-
-				offset+=1
-				string=[]
-				break
-
-			elif(value==ord(b'[')):
-				if(self.log==True):
-					txt.write('\n')
-					if(len(string)>0):
-						txt.write(' '*n+'header:'+str(self.input[string[0]:offset]))
-					else:
-						txt.write(' '*n+'header:None')
-					txt.write(' [ '+str(offset))
-					txt.write(' '*(n+4))
-				#print(round(100*offset/float(len(self.input)), 3), 'procent')
-				node=Node()
-				node.parent=parentNode
-				parentNode.children.append(node)
-				node.offset=offset
-				node.name=string
-				if(len(string)>0):
-					node.header=self.input[string[0]:offset]
-				else:
-					node.header=b''
-				string=[]
-				self.tree(node, n)
-				if(self.log==True):
-					txt.write(' '*n)
-			else:
-				#string+=value
-				if(len(string)==0):
-					string.append(offset)
-				offset+=1
-
 def getUniqueID(ys, data):
 	UniqueID=None
 	values=ys.values(data, ':')
-	if(b'"UniqueID"' in values):
-		UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
+	if('"UniqueID"' in values):
+		UniqueID=ys.getValue(values, '"UniqueID"', 'i')
 	return UniqueID
 
 
@@ -1956,13 +1715,13 @@ class NewNode:
 		self.UniqueID=None
 
 def getIDTree(ys, parentNode, n, parentNewNode):
-	if(len(parentNode.header)!=0 and parentNode.header!=b','):
+	if(len(parentNode.header)!=0 and parentNode.header!=','):
 		n+=4
 	UniqueID=getUniqueID(ys, parentNode.data)
 	if(UniqueID):
 		parentNewNode.UniqueID=UniqueID
 	for child in parentNode.children:
-		if(len(child.header)!=0 and child.header!=b','):
+		if(len(child.header)!=0 and child.header!=','):
 			newNode=NewNode()
 			UniqueID=getUniqueID(ys, child.header)
 			if(UniqueID):
@@ -1978,11 +1737,11 @@ def getIDTree(ys, parentNode, n, parentNewNode):
 
 
 def getPath(File):
-	path=os.path.join(os.path.dirname(filename), File.split(b'.gz')[0].decode())
+	path=os.path.join(os.path.dirname(filename), File.split('.gz')[0])
 	if(os.path.exists(path)==False):
-		path=os.path.join(os.path.dirname(filename), File.decode() + '.txt')
+		path=os.path.join(os.path.dirname(filename), File + '.txt')
 	if(os.path.exists(path)==False):
-		path=os.path.join(os.path.dirname(filename), File.decode())
+		path=os.path.join(os.path.dirname(filename), File)
 	if(os.path.exists(path)==True):
 		return path
 	else:
@@ -1998,18 +1757,18 @@ def Vertex(ys, b):
 	type=None
 	vertexArray=[]
 	values=ys.values(b.data, ':')
-	if(b'"ItemSize"' in values):
-		ItemSize=int(values[b'"ItemSize"'])
-		Int32Array=ys.get(b, b'"Int32Array"')
+	if('"ItemSize"' in values):
+		ItemSize=int(values['"ItemSize"'])
+		Int32Array=ys.get(b, '"Int32Array"')
 		if(Int32Array):
 			type='Int32Array'
 			values=ys.values(Int32Array[0].data, ':')
-			Size=ys.getValue(values, b'"Size"', 'i')
-			Offset=ys.getValue(values, b'"Offset"', 'i')
-			File=ys.getValue(values, b'"File"', '""')
-			Encoding=ys.getValue(values, b'"Encoding"')
+			Size=ys.getValue(values, '"Size"', 'i')
+			Offset=ys.getValue(values, '"Offset"', 'i')
+			File=ys.getValue(values, '"File"', '""')
+			Encoding=ys.getValue(values, '"Encoding"')
 			#write(log, [type, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding], n)
-			if(Encoding==b'"varint"'):
+			if(Encoding=='"varint"'):
 				path=getPath(File)
 				if(path):
 					file=open(path, 'rb')
@@ -2018,17 +1777,17 @@ def Vertex(ys, b):
 					vertexArray.append([bytes, Encoding, ItemSize])
 					file.close()
 
-		Float32Array=ys.get(b, b'"Float32Array"')
+		Float32Array=ys.get(b, '"Float32Array"')
 		if(Float32Array):
 			type='Float32Array'
 			#print(mode, type)
 			values=ys.values(Float32Array[0].data, ':')
-			Size=ys.getValue(values, b'"Size"', 'i')
-			Offset=ys.getValue(values, b'"Offset"', 'i')
-			File=ys.getValue(values, b'"File"', '""')
-			Encoding=ys.getValue(values, b'"Encoding"')
+			Size=ys.getValue(values, '"Size"', 'i')
+			Offset=ys.getValue(values, '"Offset"', 'i')
+			File=ys.getValue(values, '"File"', '""')
+			Encoding=ys.getValue(values, '"Encoding"')
 			#write(log, [type, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding], n)
-			if(Encoding!=b'"varint"'):
+			if(Encoding!='"varint"'):
 				path=getPath(File)
 				if(path):
 					file=open(path, 'rb')
@@ -2051,17 +1810,17 @@ def TexCoord(ys, b):
 	type=None
 	TexCoordArray=[]
 	values=ys.values(b.data, ':')
-	if(b'"ItemSize"' in values):
-		ItemSize=int(values[b'"ItemSize"'])
-		Int32Array=ys.get(b, b'"Int32Array"')
+	if('"ItemSize"' in values):
+		ItemSize=int(values['"ItemSize"'])
+		Int32Array=ys.get(b, '"Int32Array"')
 		if(Int32Array):
 			type='Int32Array'
 			values=ys.values(Int32Array[0].data, ':')
-			Size=ys.getValue(values, b'"Size"', 'i')
-			Offset=ys.getValue(values, b'"Offset"', 'i')
-			File=ys.getValue(values, b'"File"', '""')
-			Encoding=ys.getValue(values, b'"Encoding"')
-			if(Encoding==b'"varint"'):
+			Size=ys.getValue(values, '"Size"', 'i')
+			Offset=ys.getValue(values, '"Offset"', 'i')
+			File=ys.getValue(values, '"File"', '""')
+			Encoding=ys.getValue(values, '"Encoding"')
+			if(Encoding=='"varint"'):
 				path=getPath(File)
 				if(path):
 					file=open(path, 'rb')
@@ -2070,15 +1829,15 @@ def TexCoord(ys, b):
 					TexCoordArray.append([bytes, Encoding, ItemSize])
 					file.close()
 
-		Float32Array=ys.get(b, b'"Float32Array"')
+		Float32Array=ys.get(b, '"Float32Array"')
 		if(Float32Array):
-			type=b'Float32Array'
+			type='Float32Array'
 			values=ys.values(Float32Array[0].data, ':')
-			Size=ys.getValue(values, b'"Size"', 'i')
-			Offset=ys.getValue(values, b'"Offset"', 'i')
-			File=ys.getValue(values, b'"File"', '""')
-			Encoding=ys.getValue(values, b'"Encoding"')
-			if(Encoding!=b'"varint"'):
+			Size=ys.getValue(values, '"Size"', 'i')
+			Offset=ys.getValue(values, '"Offset"', 'i')
+			File=ys.getValue(values, '"File"', '""')
+			Encoding=ys.getValue(values, '"Encoding"')
+			if(Encoding!='"varint"'):
 				path=getPath(File)
 				if(path):
 					file=open(path, 'rb')
@@ -2102,19 +1861,19 @@ def Color(ys, b):
 	type=None
 	values=ys.values(b.data, ':')
 	colorArray=[]
-	if(b'"ItemSize"' in values):
-		ItemSize=int(values[b'"ItemSize"'])
-		Uint8Array=ys.get(b, b'"Uint8Array"')
+	if('"ItemSize"' in values):
+		ItemSize=int(values['"ItemSize"'])
+		Uint8Array=ys.get(b, '"Uint8Array"')
 		if(Uint8Array):
 			type="Uint8Array"
 			values=ys.values(Uint8Array[0].data, ':')
-			Size=ys.getValue(values, b'"Size"', 'i')
-			Offset=ys.getValue(values, b'"Offset"', 'i')
-			Encoding=ys.getValue(values, b'"Encoding"', '""')
-			File=ys.getValue(values, b'"File"', '""')
+			Size=ys.getValue(values, '"Size"', 'i')
+			Offset=ys.getValue(values, '"Offset"', 'i')
+			Encoding=ys.getValue(values, '"Encoding"', '""')
+			File=ys.getValue(values, '"File"', '""')
 			path=getPath(File)
 			if(path):
-				if(Encoding!=b'"varint"'):
+				if(Encoding!='"varint"'):
 					file=open(path, 'rb')
 					g=BinaryReader(file)
 					g.seek(Offset)
@@ -2124,17 +1883,17 @@ def Color(ys, b):
 						list.append(bytes[m*ItemSize:m*ItemSize+ItemSize])
 					colorArray=list
 					file.close()
-		Float32Array=ys.get(b, b'"Float32Array"')
+		Float32Array=ys.get(b, '"Float32Array"')
 		if(Float32Array):
 			type="Float32Array"
 			values=ys.values(Float32Array[0].data, ':')
-			Size=ys.getValue(values, b'"Size"', 'i')
-			Offset=ys.getValue(values, b'"Offset"', 'i')
-			Encoding=ys.getValue(values, b'"Encoding"', '""')
-			File=ys.getValue(values, b'"File"', '""')
+			Size=ys.getValue(values, '"Size"', 'i')
+			Offset=ys.getValue(values, '"Offset"', 'i')
+			Encoding=ys.getValue(values, '"Encoding"', '""')
+			File=ys.getValue(values, '"File"', '""')
 			path=getPath(File)
 			if(path):
-				if(Encoding!=b'"varint"'):
+				if(Encoding!='"varint"'):
 					file=open(path, 'rb')
 					g=BinaryReader(file)
 					g.seek(Offset)
@@ -2170,7 +1929,7 @@ def getIndices(itemsize, size, offset, type, g, mode, magic):
 	MissingCondition=skipdecode
 	if(MissingCondition!=1):
 
-		if(mode==b'"TRIANGLE_STRIP"'):
+		if(mode=='"TRIANGLE_STRIP"'):
 					k=IMPLICIT_HEADER_LENGTH+bytes[IMPLICIT_HEADER_MASK_LENGTH]
 					bytes=decodeDelta(bytes, k)
 					#write(log, [magic, k], 0)
@@ -2183,7 +1942,7 @@ def getIndices(itemsize, size, offset, type, g, mode, magic):
 					#write(log, [magic], 0)
 					#write(log, bytes, 0)
 
-		elif(mode==b'"TRIANGLES"'):
+		elif(mode=='"TRIANGLES"'):
 					k=0
 					bytes=decodeDelta(bytes, k)
 					#write(log, [magic], 0)
@@ -2207,35 +1966,35 @@ def PrimitiveSetList(ys, child):
 	indiceArray=[]
 	for child in child.children:
 		b=child.node
-		if(b'"DrawElementsUInt"' in b.header):
-			#print(f'(\'---DATA:\', \'{b.data.decode()}\')')
+		if('"DrawElementsUInt"' in b.header):
+			#print(f'(\'---DATA:\', \'{b.data}\')')
 			values=ys.values(b.data, ':')
-			mode=values[b'"Mode"']
+			mode=values['"Mode"']
 			Size=None
 			Offset=None
 			Encoding=None
 			ItemSize=None
 			type=None
-			if(mode!=b'"LINES"'):
-				Indices=ys.get(b, b'"Indices"')
+			if(mode!='"LINES"'):
+				Indices=ys.get(b, '"Indices"')
 				if(Indices):
 					values=ys.values(Indices[0].data, ':')
-					ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-					Uint32Array=ys.get(Indices[0], b'"Uint32Array"')
+					ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+					Uint32Array=ys.get(Indices[0], '"Uint32Array"')
 					type="Uint32Array"
 					#print("DrawElementsUInt", type)
 					if(Uint32Array):
 						values=ys.values(Uint32Array[0].data, ':')
-						Size=ys.getValue(values, b'"Size"', 'i')
-						Offset=ys.getValue(values, b'"Offset"', 'i')
-						Encoding=ys.getValue(values, b'"Encoding"', '""')
+						Size=ys.getValue(values, '"Size"', 'i')
+						Offset=ys.getValue(values, '"Offset"', 'i')
+						Encoding=ys.getValue(values, '"Encoding"', '""')
 						#write(log, ['Indice:', 'mode:', mode, type, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding, 'magic:', magic], n)
-						if(Encoding==b'varint'):
+						if(Encoding=='varint'):
 							path=os.path.join(os.path.dirname(ys.filename), "model_file.bin.gz.txt")
 							if(os.path.exists(path)==False):
 								path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 							if(os.path.exists(path)==False):
-								path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
+								path=os.path.join(os.path.dirname(ys.filename), (values['"File"'].split('"')[1])) #+'.txt'
 							if(os.path.exists(path)==True):
 								file=open(path, 'rb')
 								g=BinaryReader(file)
@@ -2245,35 +2004,35 @@ def PrimitiveSetList(ys, child):
 			#else:
 			#	print('LINES')
 
-		if(b'"DrawElementsUShort"' in b.header):
+		if('"DrawElementsUShort"' in b.header):
 			values=ys.values(b.data, ':')
-			mode=values[b'"Mode"']
+			mode=values['"Mode"']
 			Size=None
 			Offset=None
 			Encoding=None
 			ItemSize=None
 			type=None
-			if(mode!=b'"LINES"'):
-				Indices=ys.get(b, b'"Indices"')
+			if(mode!='"LINES"'):
+				Indices=ys.get(b, '"Indices"')
 				if(Indices):
 					values=ys.values(Indices[0].data, ':')
-					ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-					Uint16Array=ys.get(Indices[0], b'"Uint16Array"')
+					ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+					Uint16Array=ys.get(Indices[0], '"Uint16Array"')
 					type="Uint16Array"
 					#print("DrawElementsUShort", type)
 					if(Uint16Array):
 						values=ys.values(Uint16Array[0].data, ':')
-						Size=ys.getValue(values, b'"Size"', 'i')
-						Offset=ys.getValue(values, b'"Offset"', 'i')
-						Encoding=ys.getValue(values, b'"Encoding"', '""')
+						Size=ys.getValue(values, '"Size"', 'i')
+						Offset=ys.getValue(values, '"Offset"', 'i')
+						Encoding=ys.getValue(values, '"Encoding"', '""')
 						#write(log, ['Indice:', 'mode:', mode, type, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding, 'magic:', magic], n)
 						#print(Encoding)
-						if(Encoding==b'varint'):
+						if(Encoding=='varint'):
 							path=os.path.join(os.path.dirname(ys.filename), "model_file.bin.gz.txt")
 							if(os.path.exists(path)==False):
 								path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 							if(os.path.exists(path)==False):
-								path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
+								path=os.path.join(os.path.dirname(ys.filename), (values['"File"'].split('"')[1])) #+'.txt'
 							if(os.path.exists(path)==True):
 								file=open(path, 'rb')
 								g=BinaryReader(file)
@@ -2285,7 +2044,7 @@ def PrimitiveSetList(ys, child):
 							if(os.path.exists(path)==False):
 								path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 							if(os.path.exists(path)==False):
-								path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
+								path=os.path.join(os.path.dirname(ys.filename), (values['"File"'].split('"')[1])) #+'.txt'
 							if(os.path.exists(path)==True):
 								file=open(path, 'rb')
 								g=BinaryReader(file)
@@ -2296,33 +2055,33 @@ def PrimitiveSetList(ys, child):
 			#else:
 			#	print('LINES')
 
-		if(b'"DrawElementsUByte"' in b.header):
+		if('"DrawElementsUByte"' in b.header):
 			values=ys.values(b.data, ':')
-			mode=values[b'"Mode"']
+			mode=values['"Mode"']
 			Size=None
 			Offset=None
 			Encoding=None
 			ItemSize=None
 			type=None
-			if(mode!=b'"LINES"'):
-				Indices=ys.get(b, b'"Indices"')
+			if(mode!='"LINES"'):
+				Indices=ys.get(b, '"Indices"')
 				if(Indices):
 					values=ys.values(Indices[0].data, ':')
-					ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-					Uint8Array=ys.get(Indices[0], b'"Uint8Array"')
+					ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+					Uint8Array=ys.get(Indices[0], '"Uint8Array"')
 					type="Uint8Array"
 					#print("DrawElementsUByte", type)
 					if(Uint8Array):
 						values=ys.values(Uint8Array[0].data, ':')
-						Size=ys.getValue(values, b'"Size"', 'i')
-						Offset=ys.getValue(values, b'"Offset"', 'i')
-						Encoding=ys.getValue(values, b'"Encoding"', '""')
+						Size=ys.getValue(values, '"Size"', 'i')
+						Offset=ys.getValue(values, '"Offset"', 'i')
+						Encoding=ys.getValue(values, '"Encoding"', '""')
 						#write(log, ['Indice:', 'mode:', mode, type, 'Size:', Size, 'Offset:', Offset, 'Encoding:', Encoding, 'magic:', magic], n)
 						path=os.path.join(os.path.dirname(ys.filename), "model_file.bin.gz.txt")
 						if(os.path.exists(path)==False):
 							path=os.path.join(os.path.dirname(ys.filename), "model_file.bin")
 						if(os.path.exists(path)==False):
-							path=os.path.join(os.path.dirname(ys.filename), (values[b'"File"'].split(b'"')[1]).decode()) #+'.txt'
+							path=os.path.join(os.path.dirname(ys.filename), (values['"File"'].split('"')[1])) #+'.txt'
 						if(os.path.exists(path)==True):
 							file=open(path, 'rb')
 							g=BinaryReader(file)
@@ -2340,17 +2099,17 @@ def Bones(ys, b):
 	n=20
 	bones=[]
 	values=ys.values(b.data, ':')
-	ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-	Uint16Array=ys.get(b, b'"Uint16Array"')
+	ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+	Uint16Array=ys.get(b, '"Uint16Array"')
 	if(Uint16Array):
 		type="Uint16Array"
 		values=ys.values(Uint16Array[0].data, ':')
-		File=ys.getValue(values, b'"File"', '""')
-		Size=ys.getValue(values, b'"Size"', 'i')
-		Offset=ys.getValue(values, b'"Offset"', 'i')
-		Encoding=ys.getValue(values, b'"Encoding"', '""')
+		File=ys.getValue(values, '"File"', '""')
+		Size=ys.getValue(values, '"Size"', 'i')
+		Offset=ys.getValue(values, '"Offset"', 'i')
+		Encoding=ys.getValue(values, '"Encoding"', '""')
 
-		if(Encoding==b'varint'):
+		if(Encoding=='varint'):
 			path=getPath(File)
 			if(path):
 				file=open(path, 'rb')
@@ -2365,16 +2124,16 @@ def Weights(ys, b):
 	n=20
 	weights=[]
 	values=ys.values(b.data, ':')
-	ItemSize=ys.getValue(values, b'"ItemSize"', 'i')
-	Float32Array=ys.get(b, b'"Float32Array"')
+	ItemSize=ys.getValue(values, '"ItemSize"', 'i')
+	Float32Array=ys.get(b, '"Float32Array"')
 	if(Float32Array):
 		values=ys.values(Float32Array[0].data, ':')
-		File=ys.getValue(values, b'"File"', '""')
-		Size=ys.getValue(values, b'"Size"', 'i')
-		Offset=ys.getValue(values, b'"Offset"', 'i')
-		Encoding=ys.getValue(values, b'"Encoding"', '""')
+		File=ys.getValue(values, '"File"', '""')
+		Size=ys.getValue(values, '"Size"', 'i')
+		Offset=ys.getValue(values, '"Offset"', 'i')
+		Encoding=ys.getValue(values, '"Encoding"', '""')
 
-		if(Encoding==b'varint'):
+		if(Encoding=='varint'):
 			path=getPath(File)
 			if(path):
 				file=open(path, 'rb')
@@ -2398,7 +2157,7 @@ def BoneMap(ys, b):
 	values=ys.values(b.data, ':')
 	for value in values:
 		id=ys.getValue(values, value, 'i')
-		name=value.split(b'"')[1]
+		name=value.split('"')[1]
 		BoneMap[name]=id
 	return BoneMap
 
@@ -2422,85 +2181,85 @@ def osgAnimationRigGeometry(ys, parentNewNode):
 	mesh.parentNode=parentNewNode.node
 	for child in parentNewNode.children:
 		#write(log, [child.node.header], 4)
-		if(b'"SourceGeometry"' in child.node.header):
+		if('"SourceGeometry"' in child.node.header):
 			for child in child.children:
 				#write(log, [child.node.header], 8)
-				if(b'"osgAnimation.MorphGeometry"' in child.node.header):
+				if('"osgAnimation.MorphGeometry"' in child.node.header):
 					for child in child.children:
 						#write(log, [child.node.header], 12)
-						if(b'"VertexAttributeList"' in child.node.header):
+						if('"VertexAttributeList"' in child.node.header):
 							for child in child.children:
-								if(b'"Vertex"' in child.node.header):
+								if('"Vertex"' in child.node.header):
 									mesh.vertexArray=Vertex(ys, child.node)
-								if(b'"TexCoord0"' in child.node.header):
+								if('"TexCoord0"' in child.node.header):
 									mesh.TexCoord0Array=TexCoord(ys, child.node)
-								if(b'"TexCoord1"' in child.node.header):
+								if('"TexCoord1"' in child.node.header):
 									mesh.TexCoord1Array=TexCoord(ys, child.node)
-								if(b'"TexCoord3"' in child.node.header):
+								if('"TexCoord3"' in child.node.header):
 									mesh.TexCoord3Array=TexCoord(ys, child.node)
-								if(b'"TexCoord5"' in child.node.header):
+								if('"TexCoord5"' in child.node.header):
 									mesh.TexCoord5Array=TexCoord(ys, child.node)
-								if(b'"TexCoord6"' in child.node.header):
+								if('"TexCoord6"' in child.node.header):
 									mesh.TexCoord6Array=TexCoord(ys, child.node)
-								if(b'"Color"' in child.node.header):
+								if('"Color"' in child.node.header):
 									mesh.colorArray=Color(ys, child.node)
-						if(b'"PrimitiveSetList"' in child.node.header):
+						if('"PrimitiveSetList"' in child.node.header):
 							mesh.indiceArray=PrimitiveSetList(ys, child)
-						if(b'"UserDataContainer"' in child.node.header):
+						if('"UserDataContainer"' in child.node.header):
 							mesh.atributes=UserDataContainer(ys, child)
-						if(b'"MorphTargets"' in child.node.header):
+						if('"MorphTargets"' in child.node.header):
 							print("MorphTargets")
 							for child in child.children:
 								#write(log, [child.node.header], 16)
-								if(b'"osg.Geometry"' in child.node.header):
+								if('"osg.Geometry"' in child.node.header):
 									Name=None
 									for child in child.children:
 										#write(log, [child.node.header], 20)
-										if(b'"VertexAttributeList"' in child.node.header):
+										if('"VertexAttributeList"' in child.node.header):
 											for child in child.children:
-												if(b'"Vertex"' in child.node.header):
+												if('"Vertex"' in child.node.header):
 													if(Name):
 														mesh.morphArray[Name]=Vertex(ys, child.node)
-										if(b'"UniqueID"' in child.node.header):
+										if('"UniqueID"' in child.node.header):
 											values=ys.values(child.node.header, ':')
-											UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
-											Name=ys.getValue(values, b'"Name"', '""')
+											UniqueID=ys.getValue(values, '"UniqueID"', 'i')
+											Name=ys.getValue(values, '"Name"', '""')
 											#write(log, [UniqueID, Name], 24)
-				if(b'"osg.Geometry"' in child.node.header):
+				if('"osg.Geometry"' in child.node.header):
 					for child in child.children:
-						if(b'"VertexAttributeList"' in child.node.header):
+						if('"VertexAttributeList"' in child.node.header):
 							for child in child.children:
-								if(b'"Vertex"' in child.node.header):
+								if('"Vertex"' in child.node.header):
 									mesh.vertexArray=Vertex(ys, child.node)
-								if(b'"TexCoord0"' in child.node.header):
+								if('"TexCoord0"' in child.node.header):
 									mesh.TexCoord0Array=TexCoord(ys, child.node)
-								if(b'"TexCoord1"' in child.node.header):
+								if('"TexCoord1"' in child.node.header):
 									mesh.TexCoord1Array=TexCoord(ys, child.node)
-								if(b'"TexCoord3"' in child.node.header):
+								if('"TexCoord3"' in child.node.header):
 									mesh.TexCoord3Array=TexCoord(ys, child.node)
-								if(b'"TexCoord5"' in child.node.header):
+								if('"TexCoord5"' in child.node.header):
 									mesh.TexCoord5Array=TexCoord(ys, child.node)
-								if(b'"TexCoord6"' in child.node.header):
+								if('"TexCoord6"' in child.node.header):
 									mesh.TexCoord6Array=TexCoord(ys, child.node)
-								if(b'"Color"' in child.node.header):
+								if('"Color"' in child.node.header):
 									mesh.colorArray=Color(ys, child.node)
-						if(b'"PrimitiveSetList"' in child.node.header):
+						if('"PrimitiveSetList"' in child.node.header):
 							mesh.indiceArray=PrimitiveSetList(ys, child)
-						if(b'"UserDataContainer"' in child.node.header):
+						if('"UserDataContainer"' in child.node.header):
 							mesh.atributes=UserDataContainer(ys, child)
-						if(b'"Name"' in child.node.header):
+						if('"Name"' in child.node.header):
 							values=ys.values(child.node.header, ':')
-							Name=ys.getValue(values, b'"Name"', '""')
-							mesh.name = Name.decode()
+							Name=ys.getValue(values, '"Name"', '""')
+							mesh.name = Name
 
 
-		if(b'"VertexAttributeList"' in child.node.header):
+		if('"VertexAttributeList"' in child.node.header):
 			for child in child.children:
-				if(b'"Bones"' in child.node.header):
+				if('"Bones"' in child.node.header):
 					mesh.Bones=Bones(ys, child.node)
-				if(b'"Weights"' in child.node.header):
+				if('"Weights"' in child.node.header):
 					mesh.Weights=Weights(ys, child.node)
-		if(b'"BoneMap"' in child.node.header):
+		if('"BoneMap"' in child.node.header):
 			mesh.BoneMap=BoneMap(ys, child.node)
 
 	return mesh
@@ -2524,26 +2283,26 @@ def osgGeometry(ys, parentNewNode):
 	mesh.parentNode=parentNewNode.node
 	for child in parentNewNode.children:
 		#write(log, [child.node.header], 4)
-		if(b'"VertexAttributeList"' in child.node.header):
+		if('"VertexAttributeList"' in child.node.header):
 			for child in child.children:
 				#write(log, [child.node.header], 8)
-				if(b'"Vertex"' in child.node.header):
+				if('"Vertex"' in child.node.header):
 					mesh.vertexArray=Vertex(ys, child.node)
-				if(b'"TexCoord0"' in child.node.header):
+				if('"TexCoord0"' in child.node.header):
 					mesh.TexCoord0Array=TexCoord(ys, child.node)
-				if(b'"TexCoord1"' in child.node.header):
+				if('"TexCoord1"' in child.node.header):
 					mesh.TexCoord1Array=TexCoord(ys, child.node)
-				if(b'"TexCoord3"' in child.node.header):
+				if('"TexCoord3"' in child.node.header):
 					mesh.TexCoord3Array=TexCoord(ys, child.node)
-				if(b'"TexCoord5"' in child.node.header):
+				if('"TexCoord5"' in child.node.header):
 					mesh.TexCoord5Array=TexCoord(ys, child.node)
-				if(b'"TexCoord6"' in child.node.header):
+				if('"TexCoord6"' in child.node.header):
 					mesh.TexCoord6Array=TexCoord(ys, child.node)
-				if(b'"Color"' in child.node.header):
+				if('"Color"' in child.node.header):
 					mesh.colorArray=Color(ys, child.node)
-		if(b'"PrimitiveSetList"' in child.node.header):
+		if('"PrimitiveSetList"' in child.node.header):
 			mesh.indiceArray=PrimitiveSetList(ys, child)
-		if(b'"UserDataContainer"' in child.node.header):
+		if('"UserDataContainer"' in child.node.header):
 			mesh.atributes=UserDataContainer(ys, child)
 	return mesh
 
@@ -2566,45 +2325,45 @@ def osgAnimationMorphGeometry(ys, parentNewNode):
 	mesh.atributes={}
 	mesh.parentNode=parentNewNode.node
 	for child in parentNewNode.children:
-		if(b'"MorphTargets"' in child.node.header):
+		if('"MorphTargets"' in child.node.header):
 			print("MorphTargets")
 			for child in child.children:
 				#write(log, [child.node.header], 16)
-				if(b'"osg.Geometry"' in child.node.header):
+				if('"osg.Geometry"' in child.node.header):
 					Name=None
 					for child in child.children:
 						#write(log, [child.node.header], 20)
-						if(b'"VertexAttributeList"' in child.node.header):
+						if('"VertexAttributeList"' in child.node.header):
 							for child in child.children:
-								if(b'"Vertex"' in child.node.header):
+								if('"Vertex"' in child.node.header):
 									if(Name):
 										mesh.morphArray[Name]=Vertex(ys, child.node)
-						if(b'"UniqueID"' in child.node.header):
+						if('"UniqueID"' in child.node.header):
 							values=ys.values(child.node.header, ':')
-							UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
-							Name=ys.getValue(values, b'"Name"', '""')
+							UniqueID=ys.getValue(values, '"UniqueID"', 'i')
+							Name=ys.getValue(values, '"Name"', '""')
 							mesh.name = Name
 							#write(log, [UniqueID, Name], 24)
-		if(b'"VertexAttributeList"' in child.node.header):
+		if('"VertexAttributeList"' in child.node.header):
 			for child in child.children:
 				#print(child.node.header)
-				if(b'"Vertex"' in child.node.header):
+				if('"Vertex"' in child.node.header):
 					mesh.vertexArray=Vertex(ys, child.node)
-				if(b'"TexCoord0"' in child.node.header):
+				if('"TexCoord0"' in child.node.header):
 					mesh.TexCoord0Array=TexCoord(ys, child.node)
-				if(b'"TexCoord1"' in child.node.header):
+				if('"TexCoord1"' in child.node.header):
 					mesh.TexCoord1Array=TexCoord(ys, child.node)
-				if(b'"TexCoord3"' in child.node.header):
+				if('"TexCoord3"' in child.node.header):
 					mesh.TexCoord3Array=TexCoord(ys, child.node)
-				if(b'"TexCoord5"' in child.node.header):
+				if('"TexCoord5"' in child.node.header):
 					mesh.TexCoord5Array=TexCoord(ys, child.node)
-				if(b'"TexCoord6"' in child.node.header):
+				if('"TexCoord6"' in child.node.header):
 					mesh.TexCoord6Array=TexCoord(ys, child.node)
-				if(b'"Color"' in child.node.header):
+				if('"Color"' in child.node.header):
 					mesh.colorArray=Color(ys, child.node)
-		if(b'"PrimitiveSetList"' in child.node.header):
+		if('"PrimitiveSetList"' in child.node.header):
 			mesh.indiceArray=PrimitiveSetList(ys, child)
-		if(b'"UserDataContainer"' in child.node.header):
+		if('"UserDataContainer"' in child.node.header):
 			mesh.atributes=UserDataContainer(ys, child)
 
 
@@ -2645,27 +2404,27 @@ def drawMesh(ys, mesh):
 			mat.IDStart=len(mesh.indiceList)
 			mat.IDCount=len(indices)
 			mesh.indiceList.extend(indices)
-			if(mode==b'"TRIANGLE_STRIP"'):
+			if(mode=='"TRIANGLE_STRIP"'):
 				mat.TRISTRIP=True
-			if(mode==b'"TRIANGLES"'):
+			if(mode=='"TRIANGLES"'):
 				mat.TRIANGLE=True
 
 		indices=mesh.indiceArray[0][0]
 		mode=mesh.indiceArray[0][1]
 	if(len(mesh.vertexArray)==1):
-		if(mesh.vertexArray[0][1]==b'"varint"'):
+		if(mesh.vertexArray[0][1]=='"varint"'):
 			if(mode):
 				bytes=mesh.vertexArray[0][0]
 				ItemSize=mesh.vertexArray[0][2]
-				if(mode==b'"TRIANGLE_STRIP"'):
+				if(mode=='"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices, bytes, ItemSize)
-				s1=float(mesh.atributes[b'vtx_bbl_x'])
-				s2=float(mesh.atributes[b'vtx_bbl_y'])
-				s3=float(mesh.atributes[b'vtx_bbl_z'])
+				s1=float(mesh.atributes['vtx_bbl_x'])
+				s2=float(mesh.atributes['vtx_bbl_y'])
+				s3=float(mesh.atributes['vtx_bbl_z'])
 				s=[s1, s2, s3]
-				a1=float(mesh.atributes[b'vtx_h_x'])
-				a2=float(mesh.atributes[b'vtx_h_y'])
-				a3=float(mesh.atributes[b'vtx_h_z'])
+				a1=float(mesh.atributes['vtx_h_x'])
+				a2=float(mesh.atributes['vtx_h_y'])
+				a3=float(mesh.atributes['vtx_h_z'])
 				a=[a1, a2, a3]
 				floats=decodeQuantize(bytes, s, a, ItemSize)
 				mesh.vertPosList=[floats[m:m+ItemSize]for m in range(0, len(floats), 3)]
@@ -2677,17 +2436,17 @@ def drawMesh(ys, mesh):
 			mesh.vertPosList=list
 
 	if(len(mesh.TexCoord0Array)==1):
-		if(mesh.TexCoord0Array[0][1]==b'"varint"'):
+		if(mesh.TexCoord0Array[0][1]=='"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord0Array[0][0]
 				ItemSize=mesh.TexCoord0Array[0][2]
-				if(mode==b'"TRIANGLE_STRIP"'):
+				if(mode=='"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices, bytes, ItemSize)
-				s1=float(mesh.atributes[b'uv_0_bbl_x'])
-				s2=float(mesh.atributes[b'uv_0_bbl_y'])
+				s1=float(mesh.atributes['uv_0_bbl_x'])
+				s2=float(mesh.atributes['uv_0_bbl_y'])
 				s=[s1, s2]
-				a1=float(mesh.atributes[b'uv_0_h_x'])
-				a2=float(mesh.atributes[b'uv_0_h_y'])
+				a1=float(mesh.atributes['uv_0_h_x'])
+				a2=float(mesh.atributes['uv_0_h_y'])
 				a=[a1, a2]
 				floats=decodeQuantize(bytes, s, a, ItemSize)
 				for m in range(0, len(floats), ItemSize):
@@ -2697,17 +2456,17 @@ def drawMesh(ys, mesh):
 			list=mesh.TexCoord0Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord1Array)==1):
-		if(mesh.TexCoord1Array[0][1]==b'"varint"'):
+		if(mesh.TexCoord1Array[0][1]=='"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord1Array[0][0]
 				ItemSize=mesh.TexCoord1Array[0][2]
-				if(mode==b'"TRIANGLE_STRIP"'):
+				if(mode=='"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices, bytes, ItemSize)
-				s1=float(mesh.atributes[b'uv_1_bbl_x'])
-				s2=float(mesh.atributes[b'uv_1_bbl_y'])
+				s1=float(mesh.atributes['uv_1_bbl_x'])
+				s2=float(mesh.atributes['uv_1_bbl_y'])
 				s=[s1, s2]
-				a1=float(mesh.atributes[b'uv_1_h_x'])
-				a2=float(mesh.atributes[b'uv_1_h_y'])
+				a1=float(mesh.atributes['uv_1_h_x'])
+				a2=float(mesh.atributes['uv_1_h_y'])
 				a=[a1, a2]
 				floats=decodeQuantize(bytes, s, a, ItemSize)
 				for m in range(0, len(floats), ItemSize):
@@ -2717,17 +2476,17 @@ def drawMesh(ys, mesh):
 			list=mesh.TexCoord1Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord3Array)==1):
-		if(mesh.TexCoord3Array[0][1]==b'"varint"'):
+		if(mesh.TexCoord3Array[0][1]=='"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord3Array[0][0]
 				ItemSize=mesh.TexCoord3Array[0][2]
-				if(mode==b'"TRIANGLE_STRIP"'):
+				if(mode=='"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices, bytes, ItemSize)
-				s1=float(mesh.atributes[b'uv_3_bbl_x'])
-				s2=float(mesh.atributes[b'uv_3_bbl_y'])
+				s1=float(mesh.atributes['uv_3_bbl_x'])
+				s2=float(mesh.atributes['uv_3_bbl_y'])
 				s=[s1, s2]
-				a1=float(mesh.atributes[b'uv_3_h_x'])
-				a2=float(mesh.atributes[b'uv_3_h_y'])
+				a1=float(mesh.atributes['uv_3_h_x'])
+				a2=float(mesh.atributes['uv_3_h_y'])
 				a=[a1, a2]
 				floats=decodeQuantize(bytes, s, a, ItemSize)
 				for m in range(0, len(floats), ItemSize):
@@ -2737,17 +2496,17 @@ def drawMesh(ys, mesh):
 			list=mesh.TexCoord3Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord5Array)==1):
-		if(mesh.TexCoord5Array[0][1]==b'"varint"'):
+		if(mesh.TexCoord5Array[0][1]=='"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord5Array[0][0]
 				ItemSize=mesh.TexCoord5Array[0][2]
-				if(mode==b'"TRIANGLE_STRIP"'):
+				if(mode=='"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices, bytes, ItemSize)
-				s1=float(mesh.atributes[b'uv_5_bbl_x'])
-				s2=float(mesh.atributes[b'uv_5_bbl_y'])
+				s1=float(mesh.atributes['uv_5_bbl_x'])
+				s2=float(mesh.atributes['uv_5_bbl_y'])
 				s=[s1, s2]
-				a1=float(mesh.atributes[b'uv_5_h_x'])
-				a2=float(mesh.atributes[b'uv_5_h_y'])
+				a1=float(mesh.atributes['uv_5_h_x'])
+				a2=float(mesh.atributes['uv_5_h_y'])
 				a=[a1, a2]
 				floats=decodeQuantize(bytes, s, a, ItemSize)
 				for m in range(0, len(floats), ItemSize):
@@ -2757,17 +2516,17 @@ def drawMesh(ys, mesh):
 			list=mesh.TexCoord5Array[0][0]
 			mesh.vertUVList=list
 	elif(len(mesh.TexCoord6Array)==1):
-		if(mesh.TexCoord6Array[0][1]==b'"varint"'):
+		if(mesh.TexCoord6Array[0][1]=='"varint"'):
 			if(mode):
 				bytes=mesh.TexCoord6Array[0][0]
 				ItemSize=mesh.TexCoord6Array[0][2]
-				if(mode==b'"TRIANGLE_STRIP"'):
+				if(mode=='"TRIANGLE_STRIP"'):
 					bytes=decodePredict(indices, bytes, ItemSize)
-				s1=float(mesh.atributes[b'uv_6_bbl_x'])
-				s2=float(mesh.atributes[b'uv_6_bbl_y'])
+				s1=float(mesh.atributes['uv_6_bbl_x'])
+				s2=float(mesh.atributes['uv_6_bbl_y'])
 				s=[s1, s2]
-				a1=float(mesh.atributes[b'uv_6_h_x'])
-				a2=float(mesh.atributes[b'uv_6_h_y'])
+				a1=float(mesh.atributes['uv_6_h_x'])
+				a2=float(mesh.atributes['uv_6_h_y'])
 				a=[a1, a2]
 				floats=decodeQuantize(bytes, s, a, ItemSize)
 				for m in range(0, len(floats), ItemSize):
@@ -2784,12 +2543,12 @@ def drawMesh(ys, mesh):
 
 def UserDataContainer(ys, b):
 	atributes={}
-	Values=ys.get(b.node, b'"Values"')
+	Values=ys.get(b.node, '"Values"')
 	if(Values):
 		for a in Values[0].children:
 			values=ys.values(a.data, ':')
-			Name=ys.getValue(values, b'"Name"', '""')
-			Value=ys.getValue(values, b'"Value"', '""')
+			Name=ys.getValue(values, '"Name"', '""')
+			Value=ys.getValue(values, '"Value"', '""')
 			#if(Name):
 			#	write(log, [Name, Value], n+4)
 			if(Name):
@@ -2799,16 +2558,16 @@ def UserDataContainer(ys, b):
 def osgNode(ys, parentNewNode, parentBone):
 	for child in parentNewNode.children:
 		for child in child.children:
-			#print(f'(\'---child\', \'{child.node.header.decode()}\')')
-			if(b'"osg.Geometry"' in child.node.header):
+			#print(f'(\'---child\', \'{child.node.header}\')')
+			if('"osg.Geometry"' in child.node.header):
 				mesh=osgGeometry(ys, child)
 				mesh.parentBone=parentBone
 				model.meshList.append(mesh)
-			if(b'"osgAnimation.RigGeometry"' in child.node.header):
+			if('"osgAnimation.RigGeometry"' in child.node.header):
 				mesh=osgAnimationRigGeometry(ys, child)
 				mesh.parentBone=parentBone
 				model.meshList.append(mesh)
-			if(b'"osgAnimation.MorphGeometry"' in child.node.header):
+			if('"osgAnimation.MorphGeometry"' in child.node.header):
 				mesh=osgAnimationMorphGeometry(ys, child)
 				mesh.parentBone=parentBone
 				model.meshList.append(mesh)
@@ -2823,27 +2582,27 @@ def osgMatrixTransform(ys, parentNewNode, parentBone):
 		bone.parentName=parentBone.name
 	skeleton.boneList.append(bone)
 	for child in parentNewNode.children:
-		if(b'"Matrix"' in child.node.header):
+		if('"Matrix"' in child.node.header):
 			values=ys.values(child.node.data, 'f')
 			bone.matrix=Matrix4x4(values)
 			if(parentBone):
 				bone.matrix @= parentBone.matrix
-		if(b'"UniqueID"' in child.node.header):
+		if('"UniqueID"' in child.node.header):
 			values=ys.values(child.node.header, ':')
-			UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
-			bone.name=b'UniqueID_'+str(UniqueID).encode()
-		if(b'"Name"' in child.node.header):
+			UniqueID=ys.getValue(values, '"UniqueID"', 'i')
+			bone.name='UniqueID_'+str(UniqueID)
+		if('"Name"' in child.node.header):
 			values=ys.values(child.node.header, ':')
-			name=ys.getValue(values, b'"Name"', '""')
+			name=ys.getValue(values, '"Name"', '""')
 			#bindBone.Name=Name ###bindBone.name=name
 			bone.name=name ###bone.Name=Name
-		if(b'"UpdateCallbacks"' in child.node.header):
+		if('"UpdateCallbacks"' in child.node.header):
 			for child in child.children:
-				if(b'"osgAnimation.UpdateMatrixTransform"' in child.node.header):
+				if('"osgAnimation.UpdateMatrixTransform"' in child.node.header):
 					for child in child.children:
-						if(b'"Name"' in child.node.header):
+						if('"Name"' in child.node.header):
 							values=ys.values(child.node.header, ':')
-							name=ys.getValue(values, b'"Name"', '""')
+							name=ys.getValue(values, '"Name"', '""')
 							#bindBone.UpdateName=Name
 							bone.UpdateName=name ###bone.UpdateName=Name
 	return bone
@@ -2860,52 +2619,52 @@ def osgAnimationBone(ys, parentNewNode, parentBone):
 	bone.UpdateName=None
 	bindBone.UpdateName=None
 	for child in parentNewNode.children:
-		if(b'"InvBindMatrixInSkeletonSpace"' in child.node.header):
+		if('"InvBindMatrixInSkeletonSpace"' in child.node.header):
 			values=ys.values(child.node.data, 'f')
 			matrix=Matrix4x4(values)
 			bindBone.matrix=matrix.invert()
 			bindskeleton.boneList.append(bindBone)
-		if(b'"UniqueID"' in child.node.header):
+		if('"UniqueID"' in child.node.header):
 			values=ys.values(child.node.header, ':')
-			UniqueID=ys.getValue(values, b'"UniqueID"', 'i')
-			name = b'UniqueID_'+str(UniqueID).encode()
+			UniqueID=ys.getValue(values, '"UniqueID"', 'i')
+			name = 'UniqueID_'+str(UniqueID)
 			bindBone.name = name
 			bone.name = name
-		if(b'"Name"' in child.node.header):
+		if('"Name"' in child.node.header):
 			values = ys.values(child.node.header, ':')
-			name = ys.getValue(values, b'"Name"', '""')
+			name = ys.getValue(values, '"Name"', '""')
 			bindBone.name = name ###bindBone.Name = name
 			bone.name = name ###bone.Name = name
 			#boneIndeksList[Name]=bone.name
-		if(b'"Matrix"' in child.node.header):
+		if('"Matrix"' in child.node.header):
 			values=ys.values(child.node.data, 'f')
 			bone.matrix=Matrix4x4(values)
 			if(parentBone):
-				if(b'MatrixTransform' not in parentBone.name):
+				if('MatrixTransform' not in parentBone.name):
 					bone.parentName=parentBone.name
 				bone.matrix @= parentBone.matrix
-		if(b'"UpdateCallbacks"' in child.node.header):
+		if('"UpdateCallbacks"' in child.node.header):
 			for child in child.children:
-				if(b'"osgAnimation.UpdateBone"' in child.node.header):
+				if('"osgAnimation.UpdateBone"' in child.node.header):
 					for child in child.children:
-						if(b'"Name"' in child.node.header):
+						if('"Name"' in child.node.header):
 							values=ys.values(child.node.header, ':')
-							Name=ys.getValue(values, b'"Name"', '""')
+							Name=ys.getValue(values, '"Name"', '""')
 							bindBone.UpdateName=Name
 							bone.UpdateName=Name
 	return bone
 
 def getNewNodeTree(ys, parentNewNode, n, parentBone, data):
 
-	#print(f'(\'---xx\', \'{parentNewNode.node.header.decode()}\')')
-	if(b'"osgAnimation.Skeleton"' in parentNewNode.node.header):
+	#print(f'(\'---xx\', \'{parentNewNode.node.header}\')')
+	if('"osgAnimation.Skeleton"' in parentNewNode.node.header):
 		parentBone=osgAnimationBone(ys, parentNewNode, parentBone)
 		bindskeleton.parentBone=parentBone
-	if(b'"osg.Node"' in parentNewNode.node.header):
+	if('"osg.Node"' in parentNewNode.node.header):
 		osgNode(ys, parentNewNode, parentBone)
-	if(b'"osg.MatrixTransform"' in parentNewNode.node.header):
+	if('"osg.MatrixTransform"' in parentNewNode.node.header):
 		parentBone=osgMatrixTransform(ys, parentNewNode, parentBone)
-	if(b'"osgAnimation.Bone"' in parentNewNode.node.header):
+	if('"osgAnimation.Bone"' in parentNewNode.node.header):
 		parentBone=osgAnimationBone(ys, parentNewNode, parentBone)
 	n+=4
 	for child in parentNewNode.children:
@@ -2960,7 +2719,7 @@ def osgParser(filename):
 
 	n=0
 	choise_animation=1
-	Animations=ys.get(ys.root, b'"osgAnimation.Animation"')
+	Animations=ys.get(ys.root, '"osgAnimation.Animation"')
 	if(Animations):
 		#choise_animation=Blender.Draw.PupMenu("export animations as *.action?%t|Yes|No")
 		print("export animations as *.action?%t|Yes|No", choise_animation)
@@ -3094,18 +2853,18 @@ def htmParser(filename):
 
 
 	#print(ys.root)
-	THUMBNAILS=ys.get(ys.root, b'"thumbnails"')
+	THUMBNAILS=ys.get(ys.root, '"thumbnails"')
 	print('Thumbnails', THUMBNAILS)
 	ikona=None
 	SIZE=0
 	if(THUMBNAILS):
 		for thumbnails in THUMBNAILS:
 			#print(thumbnails.header)
-			URL=ys.get(thumbnails, b'"url"')
+			URL=ys.get(thumbnails, '"url"')
 			for a in URL:
 				values=ys.values(a.data, ':')
-				url=ys.getValue(values, b'"url"', '""')
-				size=ys.getValue(values, b'"size"', 'i')
+				url=ys.getValue(values, '"url"', '""')
+				size=ys.getValue(values, '"size"', 'i')
 				if(url):
 					basename=os.path.basename(url)
 					if('.jpeg' in basename):
@@ -3135,12 +2894,12 @@ def htmParser(filename):
 
 
 
-	RESULTS=ys.get(ys.root, b'"results"')
+	RESULTS=ys.get(ys.root, '"results"')
 	print('RESULTS', RESULTS)
 	if(RESULTS):
 		for results in RESULTS:
 			write(log, ["results"], 0)
-			UIDS=ys.get(results, b'"uid"')
+			UIDS=ys.get(results, '"uid"')
 			if(UIDS):
 				for UID in UIDS:
 					#write(log, [UID.header], 4)
@@ -3151,7 +2910,7 @@ def htmParser(filename):
 					if('"uid"' in UID.data):
 						values=ys.values(UID.data, ':')
 					if(values):
-						uid=ys.getValue(values, b'"uid"', '""')
+						uid=ys.getValue(values, '"uid"', '""')
 					write(log, ['uid:', uid], 4)
 					if(uid):
 						formats=ys.get(UID, '"format"')
@@ -3170,33 +2929,33 @@ def htmParser(filename):
 								if('"format"' in formatNode.data):
 									values=ys.values(formatNode.data, ':')
 								if(values):
-									format=ys.getValue(values, b'"format"', '""')
+									format=ys.getValue(values, '"format"', '""')
 								write(log, ['format:', format], 12)
 								values=None
 								quality=None
-								if(b'"quality"' in formatNode.header):
+								if('"quality"' in formatNode.header):
 									values=ys.values(formatNode.header, ':')
-								if(b'"quality"' in formatNode.data):
+								if('"quality"' in formatNode.data):
 									values=ys.values(formatNode.data, ':')
 								if(values):
-									quality=ys.getValue(values, b'"quality"', 'i')
+									quality=ys.getValue(values, '"quality"', 'i')
 								write(log, ['quality:', quality], 12)
 								values=None
 								url=None
-								if(b'"url"' in formatNode.header):
+								if('"url"' in formatNode.header):
 									values=ys.values(formatNode.header, ':')
-								if(b'"url"' in formatNode.data):
+								if('"url"' in formatNode.data):
 									values=ys.values(formatNode.data, ':')
 								if(values):
-									url=ys.getValue(values, b'"url"', '""')
+									url=ys.getValue(values, '"url"', '""')
 								#write(log, ['url:', url], 12)
 								if(not url):
-									if(b'"url"' in formatNode.parent.header):
+									if('"url"' in formatNode.parent.header):
 										values=ys.values(formatNode.parent.header, ':')
-									if(b'"url"' in formatNode.parent.data):
+									if('"url"' in formatNode.parent.data):
 										values=ys.values(formatNode.parent.data, ':')
 									if(values):
-										url=ys.getValue(values, b'"url"', '""')
+										url=ys.getValue(values, '"url"', '""')
 								if(url):
 									basename=os.path.basename(url)
 									if('.jpeg' in basename):
@@ -3239,24 +2998,24 @@ def htmParser(filename):
 				print('Exists:', image)
 				#os.remove(image)
 
-	materials=ys.get(ys.root, b'"materials"')
+	materials=ys.get(ys.root, '"materials"')
 	print('materials', materials)
 	if(materials):
 		for a in materials:
 			for b in a.children:
 				matName=None
-				if(b'"name"' in b.data):
+				if('"name"' in b.data):
 					values=ys.values(b.data, ':')
-					matName=ys.getValue(values, b'"name"', b'""').replace(b':', b'')
+					matName=ys.getValue(values, '"name"', '""').replace(':', '')
 					matName=matName.replace(':', '')
-					if(b'\\' in matName):
-						matName=matName.split(b'\\')[0]
+					if('\\' in matName):
+						matName=matName.split('\\')[0]
 					MATERIALS[matName]={}
 				else:
 					for c in b.children:
-						if(b'"name"' in c.header):
+						if('"name"' in c.header):
 							values=ys.values(c.header, ':')
-							matName=ys.getValue(values, b'"name"', '""')
+							matName=ys.getValue(values, '"name"', '""')
 							MATERIALS[matName]={}
 				#print(matName)
 				write(log, [matName], 0)
@@ -3264,12 +3023,12 @@ def htmParser(filename):
 					#matName=matName.replace(':', '')
 					#if('\\' in matName):
 					#	matName=matName.split('\\')[0]
-					channels=ys.get(b, b'"channels"')
+					channels=ys.get(b, '"channels"')
 					if(channels):
 						for c in channels[0].children:
 							MATERIALS[matName][c.header.split('"')[1]]=['', [], []]
 							values=ys.values(c.data, ':')
-							enable=ys.getValue(values, b'"enable"', 's')
+							enable=ys.getValue(values, '"enable"', 's')
 							if(enable):
 								if(enable=='true'):
 									for d in c.children:
@@ -3278,7 +3037,7 @@ def htmParser(filename):
 										if('"texture"' in d.header):
 											if('"uid"' in d.data):
 												values=ys.values(d.data, ':')
-												uid=ys.getValue(values, b'"uid"', '""')
+												uid=ys.getValue(values, '"uid"', '""')
 												write(log, [uid], 4)
 												if(uid in IMAGES.keys()):
 													for format in IMAGES[uid]:
@@ -3288,27 +3047,27 @@ def htmParser(filename):
 													write(log, ['MISSING:', uid], 8)
 													pass
 
-												MATERIALS[matName][c.header.split(b'"')[1]]=['texture', uid]
-												uid=MATERIALS[matName][c.header.split(b'"')[1]][1]
+												MATERIALS[matName][c.header.split('"')[1]]=['texture', uid]
+												uid=MATERIALS[matName][c.header.split('"')[1]][1]
 												#print(IMAGES[uid])
-										if(b'"color"' in d.header):
+										if('"color"' in d.header):
 											values=ys.values(d.data, 'f')
-											MATERIALS[matName][c.header.split(b'"')[1]]=['color', values]
+											MATERIALS[matName][c.header.split('"')[1]]=['color', values]
 							else:
 									for d in c.children:
 
 										values=ys.values(d.header, ':')
-										enable=ys.getValue(values, b'"enable"', 's')
+										enable=ys.getValue(values, '"enable"', 's')
 										if(enable):
 
 											if(enable=='true'):
 
 													dvalues=ys.values(d.header, ':')
 													#print(dvalues)
-													if(b'"texture"' in d.header):
-														if(b'"uid"' in d.data):
+													if('"texture"' in d.header):
+														if('"uid"' in d.data):
 															values=ys.values(d.data, ':')
-															uid=ys.getValue(values, b'"uid"', '""')
+															uid=ys.getValue(values, '"uid"', '""')
 															write(log, [uid], 4)
 															if(uid in IMAGES.keys()):
 																for format in IMAGES[uid]:
@@ -3318,12 +3077,12 @@ def htmParser(filename):
 																write(log, ['MISSING:', uid], 8)
 																pass
 
-															MATERIALS[matName][c.header.split(b'"')[1]]=['texture', uid]
-															uid=MATERIALS[matName][c.header.split(b'"')[1]][1]
+															MATERIALS[matName][c.header.split('"')[1]]=['texture', uid]
+															uid=MATERIALS[matName][c.header.split('"')[1]][1]
 															#print(IMAGES[uid])
-													if(b'"color"' in d.header):
+													if('"color"' in d.header):
 														values=ys.values(d.data, 'f')
-														MATERIALS[matName][c.header.split(b'"')[1]]=['color', values]
+														MATERIALS[matName][c.header.split('"')[1]]=['color', values]
 
 
 

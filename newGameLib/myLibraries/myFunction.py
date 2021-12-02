@@ -252,7 +252,7 @@ def write(input,list,pad):
 	for item in list:
 		#print('------', type(item), item)
 		if type(item)==bytes:
-			string+=item.decode()+' '
+			string+=item+' '
 		else:
 			string+=str(item)+" "
 	string+='\n'

@@ -38,11 +38,11 @@ class BinaryUnpacker():
 
 
 	def saveLog(self,openLog=False):
-		if self.log:
+		if (self.log):
 			print("Begin log")
 			with open("log.txt","w") as Log:
 				Log.write(self.logData+"offset:"+str(self.offset)+"\n")
-			if openLog==True:
+			if (openLog==True):
 				os.system(blendDir+os.sep+"tools"+os.sep+"Notepad++"+os.sep+"notepad++.exe"+" "+"log.txt")
 			print("End log")
 
@@ -138,18 +138,18 @@ class BinaryUnpacker():
 
 	def readString(self,n=0):
 		data=''
-		if n==0:
+		if (n==0):
 			while(True):
-				lit =  struct.unpack( 'c',self.data[self.offset:self.offset+1] )[0]
+				lit =  struct.unpack('c',self.data[self.offset:self.offset+1] )[0]
 				self.offset+=1
-				if ord(lit)!=0:
+				if (ord(lit)!=0):
 					data+=lit
 				else:break
 		else:
 			for m in range(n):
-				lit =  struct.unpack( 'c',self.data[self.offset:self.offset+1] )[0]
+				lit =  struct.unpack('c',self.data[self.offset:self.offset+1] )[0]
 				self.offset+=1
-				if ord(lit)!=0:
+				if (ord(lit)!=0):
 					data+=lit
 		if self.log:self.logData+=str(self.offset)+' '+str(data)+'\n'
 		return data
@@ -160,11 +160,11 @@ class BinaryUnpacker():
 		type=None
 		out=[]
 		for value in values:
-			if value.isdigit()==True:
+			if (value.isdigit()==True):
 				count+=value
 			else:
 				type=value
-			if type:
+			if (type):
 				if len(count)==0:count=1
 				else:count=int(count)
 				if type=='i':out.extend(self.i(count))
@@ -197,7 +197,7 @@ class BinaryUnpacker():
 
 def getDataFromFile(filename):
 	data=''
-	if os.path.exists(filename)==True:
+	if (os.path.exists(filename)==True):
 		file=open(filename,'rb')
 		data=file.read()
 	return data
@@ -222,8 +222,8 @@ def HalfToFloat(h):
 	e = int((h >> 10) & 0x0000001f) # exponent
 	f = int(h & 0x000003ff)  # fraction
 
-	if e == 0:
-		if f == 0:
+	if (e == 0):
+		if (f == 0):
 			return int(s << 31)
 		else:
 			while not (f & 0x00000400):
@@ -232,8 +232,8 @@ def HalfToFloat(h):
 			e += 1
 			f &= ~0x00000400
 			#print(s,e,f)
-	elif e == 31:
-		if f == 0:
+	elif (e == 31):
+		if (f == 0):
 			return int((s << 31) | 0x7f800000)
 		else:
 			return int((s << 31) | 0x7f800000 | (f << 13))
@@ -277,230 +277,233 @@ class BinaryReader():
 			for m in range(len(data)):
 				ch=ord(	chr(data[m] ^ self.xorKey[self.xorOffset])	)
 				self.xorData+=struct.pack('B',ch)
-				if self.xorOffset==len(self.xorKey)-1:
+				if (self.xorOffset==len(self.xorKey)-1):
 					self.xorOffset=0
 				else:
 					self.xorOffset+=1
 
-
 	def logOpen(self):
 		logDir='log'
-		if os.path.exists(logDir)==False:os.makedirs(logDir)
+		if (os.path.exists(logDir)==False):
+			os.makedirs(logDir)
 		self.log=True
-		self.logfile=open(logDir+os.sep+os.path.basename(self.inputFile.name)+'.log','w')
+		self.logfile=open(os.path.join(logDir, os.path.basename(self.inputFile.name)+'.log'),'w')
+
 	def logClose(self):
 		self.log=False
-		if self.logfile is not None:
+		if (self.logfile is not None):
 			self.logfile.close()
+
 	def logWrite(self,data):
-		if self.logfile is not None:
+		if (self.logfile is not None):
 			self.logfile.write(str(data)+'\n')
 		else:
 			print('WARNING: no log')
 
 	def dirname(self):
 		return os.path.dirname(self.inputFile.name)
+
 	def basename(self):
 		return os.path.split(os.path.basename(self.inputFile.name))[0]
+
 	def ext(self):
 		return os.path.split(os.path.basename(self.inputFile.name))[1]
 
 	def q(self,n):
 		offset=self.inputFile.tell()
 		data=struct.unpack(self.endian+n*'q',self.inputFile.read(n*8))
-		if self.debug==True:
+		if (self.debug==True):
 			print('q',data)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 		return data
 
 	def i(self,n):
-		if self.inputFile.mode=='rb':
+		if (self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
-			if self.xorKey is None:
-				if self.ARRAY==False:
+			if (self.xorKey is None):
+				if (self.ARRAY==False):
 					data=struct.unpack(self.endian+n*'i',self.inputFile.read(n*4))
 				else:
 					data = array.array('i')
 					data.fromfile(self.inputFile, n)
-					if self.endian == ">": data.byteswap()
-
-
+					if (self.endian == ">"):
+						data.byteswap()
 			else:
 				data=struct.unpack(self.endian+n*4*'B',self.inputFile.read(n*4))
 				self.XOR(data)
 				data=struct.unpack(self.endian+n*'i',self.xorData)
 
-			if self.debug==True:
+			if (self.debug==True):
 				print('i',data)
-			if self.log==True:
-				if self.logfile is not None and self.logskip is not True:
+			if (self.log==True):
+				if (self.logfile is not None and self.logskip is not True):
 					self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 			return data
-		if self.inputFile.mode=='wb':
+		if (self.inputFile.mode=='wb'):
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'i',n[m])
 				self.inputFile.write(data)
 
 	def I(self,n):
 		offset=self.inputFile.tell()
-		if self.xorKey is None:
+		if (self.xorKey is None):
 			data=struct.unpack(self.endian+n*'I',self.inputFile.read(n*4))
 		else:
 			data=struct.unpack(self.endian+n*4*'B',self.inputFile.read(n*4))
 			self.XOR(data)
 			data=struct.unpack(self.endian+n*'I',self.xorData)
-		if self.debug==True:
+		if (self.debug==True):
 			print('I',data)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 		return data
 
 	def B(self,n):
-		if self.inputFile.mode=='rb':
+		if (self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
-			if self.xorKey is None:
-				if self.ARRAY==False:
+			if (self.xorKey is None):
+				if (self.ARRAY==False):
 					data=struct.unpack(self.endian+n*'B',self.inputFile.read(n))
 				else:
 					data = array.array('B')
 					data.fromfile(self.inputFile, n)
-					if self.endian == ">": data.byteswap()
-
-
+					if (self.endian == ">"):
+						data.byteswap()
 			else:
 				data=struct.unpack(self.endian+n*'B',self.inputFile.read(n))
 				self.XOR(data)
 				data=struct.unpack(self.endian+n*'B',self.xorData)
-			if self.debug==True:
+			if (self.debug==True):
 				print('B',data)
-			if self.log==True:
-				if self.logfile is not None and self.logskip is not True:
+			if (self.log==True):
+				if (self.logfile is not None and self.logskip is not True):
 					self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 			return data
-		if self.inputFile.mode=='wb':
+		if (self.inputFile.mode=='wb'):
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'B',n[m])
 				self.inputFile.write(data)
+
 	def b(self,n):
-		if self.inputFile.mode=='rb':
+		if (self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
-			if self.xorKey is None:
-				if self.ARRAY==False:
+			if (self.xorKey is None):
+				if (self.ARRAY==False):
 					data=struct.unpack(self.endian+n*'b',self.inputFile.read(n))
 				else:
 					data = array.array('b')
 					data.fromfile(self.inputFile, n)
-					if self.endian == ">": data.byteswap()
+					if (self.endian == ">"):
+						data.byteswap()
 			else:
 				data=struct.unpack(self.endian+n*'b',self.inputFile.read(n))
 				self.XOR(data)
 				data=struct.unpack(self.endian+n*'b',self.xorData)
-			if self.debug==True:
+			if (self.debug==True):
 				print('b',data)
-			if self.log==True:
-				if self.logfile is not None and self.logskip is not True:
+			if (self.log==True):
+				if (self.logfile is not None and self.logskip is not True):
 					self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 			return data
-		if self.inputFile.mode=='wb':
+		if (self.inputFile.mode=='wb'):
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'b',n[m])
 				self.inputFile.write(data)
 	def h(self,n):
-		if self.inputFile.mode=='rb':
+		if (self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
-			if self.xorKey is None:
-				if self.ARRAY==False:
+			if (self.xorKey is None):
+				if (self.ARRAY==False):
 					data=struct.unpack(self.endian+n*'h',self.inputFile.read(n*2))
 				else:
 					data = array.array('h')
 					data.fromfile(self.inputFile, n)
-					if self.endian == ">": data.byteswap()
-
-
+					if (self.endian == ">"):
+						data.byteswap()
 			else:
 				data=struct.unpack(self.endian+n*2*'B',self.inputFile.read(n*2))
 				self.XOR(data)
 				data=struct.unpack(self.endian+n*'h',self.xorData)
-			if self.debug==True:
+			if (self.debug==True):
 				print('h',data)
-			if self.log==True:
-				if self.logfile is not None and self.logskip is not True:
+			if (self.log==True):
+				if (self.logfile is not None and self.logskip is not True):
 					self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 			return data
-		if self.inputFile.mode=='wb':
+		if (self.inputFile.mode=='wb'):
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'h',n[m])
 				self.inputFile.write(data)
 	def H(self,n):
-		if self.inputFile.mode=='rb':
+		if (self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
-			if self.xorKey is None:
-				if self.ARRAY==False:
+			if (self.xorKey is None):
+				if (self.ARRAY==False):
 					data=struct.unpack(self.endian+n*'H',self.inputFile.read(n*2))
 				else:
 					data = array.array('H')
 					data.fromfile(self.inputFile, n)
-					if self.endian == ">": data.byteswap()
-
-
+					if (self.endian == ">"):
+						data.byteswap()
 			else:
 				data=struct.unpack(self.endian+n*2*'B',self.inputFile.read(n*2))
 				self.XOR(data)
 				data=struct.unpack(self.endian+n*'H',self.xorData)
-			if self.debug==True:
+			if (self.debug==True):
 				print('H',data)
-			if self.log==True:
-				if self.logfile is not None and self.logskip is not True:
+			if (self.log==True):
+				if (self.logfile is not None and self.logskip is not True):
 					self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 			return data
-		if self.inputFile.mode=='wb':
+		if (self.inputFile.mode=='wb'):
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'H',n[m])
 				self.inputFile.write(data)
 	def f(self,n):
-		if self.inputFile.mode=='rb':
+		if (self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
-			if self.xorKey is None:
-				if self.ARRAY==False:
+			if (self.xorKey is None):
+				if (self.ARRAY==False):
 					data=struct.unpack(self.endian+n*'f',self.inputFile.read(n*4))
 				else:
 					data = array.array('f')
 					data.fromfile(self.inputFile, n)
-					if self.endian == ">": data.byteswap()
+					if (self.endian == ">"):
+						data.byteswap()
 
 			else:
 				data=struct.unpack(self.endian+n*4*'B',self.inputFile.read(n*4))
 				self.XOR(data)
 				data=struct.unpack(self.endian+n*'f',self.xorData)
-			if self.debug==True:
+			if (self.debug==True):
 				print('f',data)
-			if self.log==True:
-				if self.logfile is not None and self.logskip is not True:
+			if (self.log==True):
+				if (self.logfile is not None and self.logskip is not True):
 					self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 			return data
-		if self.inputFile.mode=='wb':
+		if (self.inputFile.mode=='wb'):
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'f',n[m])
 				self.inputFile.write(data)
 	def d(self,n):
-		if self.inputFile.mode=='rb':
+		if (self.inputFile.mode=='rb'):
 			offset=self.inputFile.tell()
-			if self.xorKey is None:
+			if (self.xorKey is None):
 				data=struct.unpack(self.endian+n*'d',self.inputFile.read(n*8))
 			else:
 				data=struct.unpack(self.endian+n*4*'B',self.inputFile.read(n*8))
 				self.XOR(data)
 				data=struct.unpack(self.endian+n*'d',self.xorData)
-			if self.debug==True:
+			if (self.debug==True):
 				print('d',data)
-			if self.log==True:
-				if self.logfile is not None and self.logskip is not True:
+			if (self.log==True):
+				if (self.logfile is not None and self.logskip is not True):
 					self.logfile.write('offset '+str(offset)+'	'+str(data)+'\n')
 			return data
-		if self.inputFile.mode=='wb':
+		if (self.inputFile.mode=='wb'):
 			for m in range(len(n)):
 				data=struct.pack(self.endian+'d',n[m])
 				self.inputFile.write(data)
@@ -510,10 +513,10 @@ class BinaryReader():
 		for id in range(n):
 			#array.append(converthalf2float(struct.unpack(self.endian+'H',self.inputFile.read(2))[0]))
 			array.append(converthalf2float(struct.unpack(self.endian+h,self.inputFile.read(2))[0]))
-		if self.debug==True:
+		if (self.debug==True):
 			print('half',array)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(offset)+'	'+str(array)+'\n')
 		return array
 
@@ -523,10 +526,10 @@ class BinaryReader():
 		for id in range(n):
 			array.append(struct.unpack(self.endian+h,self.inputFile.read(2))[0]*2**-exp)
 			#array.append(self.H(1)[0]*2**-exp)
-		if self.debug==True:
+		if (self.debug==True):
 			print('short',array)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(offset)+'	'+str(array)+'\n')
 		return array
 
@@ -534,15 +537,15 @@ class BinaryReader():
 		array = []
 		offset=self.inputFile.tell()
 		for id in range(n):
-			if self.endian=='>':
+			if (self.endian=='>'):
 				var='\x00'+self.inputFile.read(3)
-			if self.endian=='<':
+			if (self.endian=='<'):
 				var=self.inputFile.read(3)+'\x00'
 			array.append(struct.unpack(self.endian+'i',var)[0])
-		if self.debug==True:
+		if (self.debug==True):
 			print(array)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(offset)+'	'+str(array)+'\n')
 		return array
 
@@ -553,7 +556,7 @@ class BinaryReader():
 		while(True):
 			data=self.inputFile.read(size+len(values))
 			off=data.find(values)
-			if off>=0:
+			if (off>=0):
 				s+=data[:off]
 				self.inputFile.seek(start+off+len(values))
 				break
@@ -566,10 +569,10 @@ class BinaryReader():
 
 
 
-		if self.debug==True:
+		if (self.debug==True):
 			pass#print(s)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(start)+'	'+s+'\n')
 		return s
 
@@ -580,19 +583,16 @@ class BinaryReader():
 		while(True):
 			data=self.inputFile.read(size+len(values))
 			off=data.find(values)
-			if off>=0:
+			if (off>=0):
 				self.inputFile.seek(start+off+len(values))
 				mam=1
 				break
 			else:
 				self.inputFile.seek(-len(values),1)
 				start+=size
-			if self.inputFile.tell()>=self.fileSize():
+			if (self.inputFile.tell()>=self.fileSize()):
 				print('dziala')
 				break
-
-
-
 		return mam
 
 
@@ -604,7 +604,7 @@ class BinaryReader():
 			data=self.inputFile.read(size)
 			off=data.find(var)
 			#print(off)
-			if off>=0:
+			if (off>=0):
 				s+=data[:off]
 				self.inputFile.seek(start+off+len(var))
 				#print('Found',var,'offset=',self.inputFile.tell())
@@ -613,11 +613,12 @@ class BinaryReader():
 				s+=data
 				start+=size
 			#print(self.inputFile.tell()	,self.fileSize())
-			if self.inputFile.tell()>=self.fileSize():break
-		if self.debug==True:
+			if (self.inputFile.tell()>=self.fileSize()):
+				break
+		if (self.debug==True):
 			print(s)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(start)+'	'+s+'\n')
 		return s
 
@@ -628,7 +629,7 @@ class BinaryReader():
 		while(True):
 			data=self.inputFile.read(size+len(values))
 			off=data.find(values)
-			if off>=0:
+			if (off>=0):
 				s+=data[:off]
 				self.inputFile.seek(start+off+len(values))
 				break
@@ -636,18 +637,15 @@ class BinaryReader():
 				self.inputFile.seek(-len(values),1)
 				s+=data
 				start+=size
-			if self.inputFile.tell()>=self.fileSize():break
+			if (self.inputFile.tell()>=self.fileSize()):
+				break
 
-
-
-
-		if self.debug==True:
+		if (self.debug==True):
 			pass#print(s)
-		if self.log==True:
-			if self.logfile is not None and self.logskip is not True:
+		if (self.log==True):
+			if (self.logfile is not None and self.logskip is not True):
 				self.logfile.write('offset '+str(start)+'	'+s+'\n')
 		return s
-
 
 	def findAll(self,var,size=100):
 		list=[]
@@ -656,16 +654,16 @@ class BinaryReader():
 			data=self.inputFile.read(size)
 			off=data.find(var)
 			#print(off,self.inputFile.tell())
-			if off>=0:
+			if (off>=0):
 				list.append(start+off)
 				#print(start+off)
 				self.inputFile.seek(start+off+len(var))
-				#if self.debug==True:
+				#if (self.debug==True):
 				#	print(start+off)
 			else:
 				start+=size
 				self.inputFile.seek(start)
-			if 	self.inputFile.tell()>self.fileSize():
+			if (	self.inputFile.tell()>self.fileSize()):
 				break
 		return list
 
@@ -687,28 +685,26 @@ class BinaryReader():
 		''' 16-byte chunk alignment'''
 		size=self.inputFile.tell()
 		seek = (pad - (size % pad)) % pad
-		if type==1:
-			if seek==0:
+		if (type==1):
+			if (seek==0):
 				seek+=pad
 		self.inputFile.seek(seek, 1)
 
 	def read(self,count):
 		back=self.inputFile.tell()
-		if self.xorKey is None:
+		if (self.xorKey is None):
 			return self.inputFile.read(count)
-		else:
-			data=struct.unpack(self.endian+count*'B',self.inputFile.read(count))
-			self.XOR(data)
-			return self.xorData
+		data=struct.unpack(self.endian+count*'B',self.inputFile.read(count))
+		self.XOR(data)
+		return self.xorData
 
 	def bytes(self,count):
 		back=self.inputFile.tell()
-		if self.xorKey is None:
+		if (self.xorKey is None):
 			return self.inputFile.read(count)
-		else:
-			data=struct.unpack(self.endian+count*'B',self.inputFile.read(count))
-			self.XOR(data)
-			return self.xorData
+		data=struct.unpack(self.endian+count*'B',self.inputFile.read(count))
+		self.XOR(data)
+		return self.xorData
 
 	def unpack(self,values):
 		#"5i6hi"
@@ -718,13 +714,15 @@ class BinaryReader():
 		out=[]
 		for value in values:
 			#print(value,value.isdigit())
-			if value.isdigit()==True:
+			if (value.isdigit()==True):
 				count+=value
 			else:
 				type=value
-			if type:
-				if len(count)==0:count=1
-				else:count=int(count)
+			if (type):
+				if len(count)==0:
+					count=1
+				else:
+					count=int(count)
 				if type=='i':out.extend(self.i(count))
 				elif type=='I':out.extend(self.I(count))
 				elif type=='h':out.extend(self.h(count))
@@ -751,41 +749,41 @@ class BinaryReader():
 
 	def tell(self):
 		val=self.inputFile.tell()
-		if self.debug==True:
+		if (self.debug==True):
 			print('current offset is',val)
 		return val
 
 	def word(self,long):
-		if long<10000:
-			if self.inputFile.mode=='rb':
+		if (long<10000):
+			if (self.inputFile.mode=='rb'):
 				offset=self.inputFile.tell()
 				s=''
 				for j in range(0,long):
-					if self.xorKey is None:
+					if (self.xorKey is None):
 						lit =  struct.unpack('c',self.inputFile.read(1))[0]
 					else:
 						data=struct.unpack(self.endian+'B',self.inputFile.read(1))
 						self.XOR(data)
 						lit=struct.unpack(self.endian+'c',self.xorData)[0]
-					if ord(lit)!=0:
+					if (ord(lit)!=0):
 						s+=lit
-				if self.debug==True:
+				if (self.debug==True):
 					print(s)
-				if self.log==True:
-					if self.logfile is not None and self.logskip is not True:
+				if (self.log==True):
+					if (self.logfile is not None and self.logskip is not True):
 						self.logfile.write('offset '+str(offset)+'	'+s+'\n')
 				return s
-			if self.inputFile.mode=='wb':
+			if (self.inputFile.mode=='wb'):
 				self.inputFile.write(long)
 		else:
-			if self.debug==True:
+			if (self.debug==True):
 				print('WARNING:too long')
 
 	def decode(self,list):
 		litery='qwertyuiopasdfghjklzxcvbnm'
 		new=[]
 		for item in list:
-			if chr(item).lower() in litery:
+			if (chr(item).lower() in litery):
 				new.append(chr(item))
 			else:
 				new.append(item)
@@ -804,24 +802,24 @@ class New:
 		drive,tail=os.path.splitdrive(self.basename)
 		g=None
 
-		if len(drive)==0 and len(tail)!=0:
-			self.path=os.path.join(self.sys.dir, self.sys.base+'_files', self.basename.decode())
+		if (len(drive)==0 and len(tail)!=0):
+			self.path=os.path.join(self.sys.dir, self.sys.base+'_files', self.basename)
 			#print(path)
 			dirpath=os.path.dirname(self.path)
 			os.makedirs(dirpath, exist_ok=True)
 
-		if len(drive)!=0 and len(tail)!=0:
+		if (len(drive)!=0 and len(tail)!=0):
 			dirpath=os.path.dirname(self.basename)
 			self.path=self.basename
-			if os.path.exists(dirpath)==False:
+			if (os.path.exists(dirpath)==False):
 				os.makedirs(dirpath)
 
 		self.file=open(self.path,self.mode)
-		if self.mode=='wb':
+		if (self.mode=='wb'):
 			g=BinaryReader(self.file)
-		if self.mode=='rb':
+		if (self.mode=='rb'):
 			g=BinaryReader(self.file)
-		if self.mode=='w':
+		if (self.mode=='w'):
 			g=self.file
 		return g
 
@@ -832,10 +830,10 @@ class New:
 class Sys1(object):
 	def __init__(self,input):
 		self.input=input.lower()
-		#if os.path.exists(self.input):
+		#if (os.path.exists(self.input)):
 		self.dir=os.path.dirname(self.input)
 		self.base=os.path.basename(self.input)
-		if '.' in os.path.basename(self.input):
+		if ('.' in os.path.basename(self.input)):
 			self.ext=os.path.basename(self.input).split('.')[-1].lower()
 			self.base=self.base.split(self.ext)[0].replace('.','')
 		else:
@@ -854,7 +852,7 @@ class Sys1(object):
 
 	def	addDir(self,name):
 		newDir=self.dir+os.sep+name
-		if os.path.exists(newDir)==False:
+		if (os.path.exists(newDir)==False):
 			os.makedirs(newDir)
 
 	def getFiles(self,what,part=None):
@@ -863,7 +861,7 @@ class Sys1(object):
 		search.what=what
 		search.part=part
 		search.run()
-		if self.log==True:
+		if (self.log==True):
 			print('Found',len(search.list),what)
 		return search.list
 
@@ -871,8 +869,8 @@ class Sys1(object):
 
 	def parseFile(self,function,mode='rb',log=0):
 		#os.system('cls')
-		if os.path.exists(self.input)==True:
-			if mode=='rb':
+		if (os.path.exists(self.input)==True):
+			if (mode=='rb'):
 				readFile=open(self.input,'rb')
 				g=BinaryReader(readFile)
 				if log==True:g.logOpen()
@@ -887,7 +885,7 @@ class Sys1(object):
 					Blender.Draw.PupMenu(lines)
 				if log==True:g.logClose()
 				readFile.close()
-			if mode=='r':
+			if (mode=='r'):
 				function(self.input)
 		else:
 
@@ -896,9 +894,9 @@ class Sys1(object):
 
 	def parseFiles(self,function,files,mode='rb',log=0):
 		for i,filePath in enumerate(files):
-			if self.log==True:
+			if (self.log==True):
 				print('file:',i,'from',len(files),os.path.basename(filePath))
-			if mode=='rb':
+			if (mode=='rb'):
 				#os.system('cls')
 				readFile=open(filePath,'rb')
 				g=BinaryReader(readFile)
@@ -910,19 +908,19 @@ class Sys1(object):
 	def join(self,path):
 		returnDir=None
 		path=path.lower()
-		if os.path.isabs(path)==False:
+		if (os.path.isabs(path)==False):
 			path=os.path.relpath(path)
 			splitpath=os.path.split(path)
 			print
-			if len(splitpath[0])!=0:
+			if (len(splitpath[0])!=0):
 				returnDir=self.input.split(splitpath[0])[0]+path
 			else:
 				returnDir=self.dir+os.sep+path
 		else:
 			drive,tail=os.path.splitdrive(path)
-			if len(drive)>0 and os.path.exists(path)==True:
+			if (len(drive)>0 and os.path.exists(path)==True):
 				returnDir=path
-			elif len(drive)==0:
+			elif (len(drive)==0):
 				returnDir=os.path.normpath(self.dir+os.sep+tail)
 		return returnDir
 
@@ -939,17 +937,17 @@ class Searcher():
 			listDir = os.listdir(dir)
 			olddir = dir
 			for file in listDir:
-				if self.part=='ext':
-					if self.what.lower() in file.lower().split('.')[-1]:
-						if os.path.isfile(olddir+os.sep+file)==True:
+				if (self.part=='ext'):
+					if (self.what.lower() in file.lower().split('.')[-1]):
+						if (os.path.isfile(olddir+os.sep+file)==True):
 							self.list.append(olddir+os.sep+file)
 
 				else:
-					if self.what.lower() in file.lower():
-						if os.path.isfile(olddir+os.sep+file)==True:
+					if (self.what.lower() in file.lower()):
+						if (os.path.isfile(olddir+os.sep+file)==True):
 							self.list.append(olddir+os.sep+file)
 
-				if os.path.isdir(olddir+os.sep+file)==True:
+				if (os.path.isdir(olddir+os.sep+file)==True):
 					dir = olddir+os.sep+file
 					tree(dir)
 		tree(dir)
@@ -959,10 +957,10 @@ class Searcher():
 class Sys(object):
 	def __init__(self,input):
 		self.input=input.lower()
-		#if os.path.exists(self.input):
+		#if (os.path.exists(self.input)):
 		self.dir=os.path.dirname(self.input)
 		self.base=os.path.basename(self.input)
-		if '.' in os.path.basename(self.input):
+		if ('.' in os.path.basename(self.input)):
 			self.ext=os.path.basename(self.input).split('.')[-1].lower()
 			#self.base=self.base.split(self.ext)[0].replace('.','')
 		else:
@@ -981,7 +979,7 @@ class Sys(object):
 
 	def	addDir(self,name):
 		newDir=self.dir+os.sep+name
-		if os.path.exists(newDir)==False:
+		if (os.path.exists(newDir)==False):
 			os.makedirs(newDir)
 
 	def getFiles(self,what,part=None):
@@ -990,11 +988,11 @@ class Sys(object):
 		search.what=what
 		search.part=part
 		search.run()
-		if self.log==True:
+		if (self.log==True):
 			print('Found',len(search.list),what)
 		#if len(search.list)==1;
 		#	return search.list[0]
-		if len(search.list)==0:
+		if (len(search.list)==0):
 			return None
 		else:
 			return search.list
@@ -1003,15 +1001,15 @@ class Sys(object):
 
 	def parseFile(self,function,mode='rb',log=0):
 		#os.system('cls')
-		if os.path.exists(self.input)==True:
-			if mode=='rb':
+		if (os.path.exists(self.input)==True):
+			if (mode=='rb'):
 				readFile=open(self.input,'rb')
 				g=BinaryReader(readFile)
 				if log==True:g.logOpen()
 				function(self.input,g)
 				if log==True:g.logClose()
 				readFile.close()
-			if mode=='r':
+			if (mode=='r'):
 				g=open(self.input,'r')
 				function(self.input,g)
 				g.close()
@@ -1022,9 +1020,9 @@ class Sys(object):
 
 	def parseFiles(self,function,files,mode='rb',log=0):
 		for i,filePath in enumerate(files):
-			if self.log==True:
+			if (self.log==True):
 				print('file:',i,'from',len(files),os.path.basename(filePath))
-			if mode=='rb':
+			if (mode=='rb'):
 				#os.system('cls')
 				readFile=open(filePath,'rb')
 				g=BinaryReader(readFile)
@@ -1036,10 +1034,10 @@ class Sys(object):
 
 	def join(self,path):
 		returnPath=None
-		if os.path.exists(path)==False:
-			if path is not None:
+		if (os.path.exists(path)==False):
+			if (path is not None):
 				path=path.lower()
-				if os.path.isabs(path)==False:
+				if (os.path.isabs(path)==False):
 					path=os.path.relpath(path)
 					split2=path.split(os.sep)
 					split1=self.dir.split(os.sep)
@@ -1053,7 +1051,7 @@ class Sys(object):
 								for item2 in combinations(split2,n+1):
 									path=str(item1+item2).replace("('",'').replace("')",'').replace("', '",os.sep)
 									#print(path)
-									if os.path.exists(path)==True and split2[-1] in path:
+									if (os.path.exists(path)==True and split2[-1] in path):
 										print(path,'True')
 										returnPath=path
 
@@ -1061,9 +1059,9 @@ class Sys(object):
 					#returnPath=self.input.split(splitpath[0])[0]+os.sep+path
 				else:
 					drive,tail=os.path.splitdrive(path)
-					if len(drive)>0 and os.path.exists(path)==True:
+					if (len(drive)>0 and os.path.exists(path)==True):
 						returnDir=path
-					elif len(drive)==0:
+					elif (len(drive)==0):
 						returnPath=os.path.normpath(self.dir+os.sep+tail)
 		else:
 			returnPath=path

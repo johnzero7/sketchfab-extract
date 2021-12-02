@@ -417,9 +417,8 @@ class Mesh():
 					skin.IDStart=0
 				if skin.IDCount==None:
 					skin.IDCount=len(self.vertPosList)
-				for vertID in range(skin.IDStart,skin.IDStart+skin.IDCount):
+				for vertID in range(skin.IDStart, skin.IDStart+skin.IDCount):
 					self.skinIDList[vertID][skinID]=1
-
 
 	def addSkinWithIndiceList(self,blendMesh,mesh):
 		for vertID in range(len(mesh.skinIDList)):
@@ -448,9 +447,9 @@ class Mesh():
 									grName=self.boneNameList[grNameID]
 								else:
 									grName=self.boneNameList[grID]
-							vertGroup = self.object.vertex_groups.get(grName.decode())
+							vertGroup = self.object.vertex_groups.get(grName)
 							if (vertGroup is None):
-								vertGroup = self.object.vertex_groups.new(name=grName.decode())
+								vertGroup = self.object.vertex_groups.new(name=grName)
 							vertGroup.add([vertID], w, 'REPLACE')
 		blendMesh.update()
 
@@ -461,17 +460,19 @@ class Mesh():
 			weights=mesh.skinWeightList[vertID]
 			for skinID,ID in enumerate(mesh.skinIDList[vertID]):
 				if ID==1:
-					if len(weights)<len(groups):count=len(weights)
-					else:count=len(groups)
+					if len(weights)<len(groups):
+						count=len(weights)
+					else:
+						count=len(groups)
 					for n in range(count):
 						w  = weights[n]
 						if type(w)==int:w=w/255.0
 						if w!=0.0:
 							grName=groups[n]
-							if grName not in blendMesh.getVertGroupNames():
-								blendMesh.addVertGroup(grName)
-							add = Blender.Mesh.AssignModes.ADD
-							blendMesh.assignVertsToGroup(grName,[vertID],w,add)
+							vertGroup = self.object.vertex_groups.get(grName)
+							if (vertGroup is None):
+								vertGroup = self.object.vertex_groups.new(name=grName)
+							vertGroup.add([vertID], w, 'REPLACE')
 		blendMesh.update()
 
 
@@ -500,10 +501,10 @@ class Mesh():
 									grName=self.boneNameList[grNameID]
 								else:
 									grName=self.boneNameList[grID]
-							if grName not in blendMesh.getVertGroupNames():
-								blendMesh.addVertGroup(grName)
-							add = Blender.Mesh.AssignModes.ADD
-							blendMesh.assignVertsToGroup(grName,[vertID],w,add)
+							vertGroup = self.object.vertex_groups.get(grName)
+							if (vertGroup is None):
+								vertGroup = self.object.vertex_groups.new(name=grName)
+							vertGroup.add([vertID], w, 'REPLACE')
 		blendMesh.update()
 
 
@@ -693,9 +694,9 @@ class Mesh():
 					#print('addSkinWithGroupList')
 					try:
 						self.addSkinIDList()
-						self.addSkinWithGroupList(self.mesh,self)
+						self.addSkinWithGroupList(self.mesh, self)
 					except:
-						print('WARNING:self.addSkinWithGroupList:',self.mesh.name)
+						print('WARNING:self.addSkinWithGroupList:', self.mesh.name)
 
 			if len(self.vertColList)==len(self.vertPosList):
 				if len(self.triangleList)>0:

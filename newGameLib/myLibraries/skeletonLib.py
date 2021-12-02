@@ -4,7 +4,7 @@ from mathutils import *
 import bpy
 
 #Strife Online nowy euler
-
+bone_name_limit = 50
 
 def odlegloscmiedzykosciami(head1,head2):
 
@@ -79,7 +79,7 @@ class Skeleton:
 	def testLongName(self):
 		for bone in self.boneList:
 			if bone.name is not None:
-				if len(bone.name)>25:
+				if len(bone.name)>bone_name_limit:
 					self.nameTestFlag=True
 					self.nameProblemList.append(bone)
 					#print('Problem: name too long for bone',bone.name)
@@ -208,11 +208,11 @@ class Skeleton:
 			if self.debug is not None:
 				self.debugFile.write(name+'\n')
 			if name is None:
-				name=str(boneID).encode()
+				name=str(boneID)
 				self.boneList[boneID].name=name
 			self.boneNameList.append(name)
 			if name not in boneList:
-				eb = self.armature.edit_bones.new(name.decode())
+				eb = self.armature.edit_bones.new(name)
 				eb.length = 1
 		bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -222,8 +222,8 @@ class Skeleton:
 		for boneID in range(len(self.boneList)):
 			name=self.boneList[boneID].name
 			if name is None:
-				name=str(boneID).encode()
-			bone=self.armature.edit_bones[name.decode()]
+				name=str(boneID)
+			bone=self.armature.edit_bones[name]
 			parentID=None
 			parentName=None
 			if self.boneList[boneID].parentID is not None:
@@ -233,7 +233,7 @@ class Skeleton:
 			if self.boneList[boneID].parentName is not None:
 				parentName=self.boneList[boneID].parentName
 			if parentName is not None:
-				parent=self.armature.edit_bones[parentName.decode()]
+				parent=self.armature.edit_bones[parentName]
 				if parentID is not None:
 					if parentID!=-1:
 						bone.parent=parent
@@ -256,7 +256,7 @@ class Skeleton:
 			posMatrix=self.boneList[m].posMatrix
 			scaleMatrix=self.boneList[m].scaleMatrix
 			matrix=self.boneList[m].matrix
-			bone = self.armature.edit_bones[name.decode()]
+			bone = self.armature.edit_bones[name]
 			if matrix:
 				if self.ARMATURESPACE==True:
 					bone.matrix = matrix.transposed()
